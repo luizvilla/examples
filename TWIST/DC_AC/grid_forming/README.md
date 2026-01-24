@@ -1,97 +1,83 @@
-# AC Voltage Source
+# Grid Forming Inverter
 
-In this example we build an AC voltage source using a TWIST and supply a resistor.
+It generates an AC voltage source. Commonly, a grid-forming inverter is a device that autonomously establishes and maintains stable grid voltage and frequency. This example demonstrates the key setup, control flow, and expected outputs for this application.
 
-<div style="text-align:center"><img src="Image/grid_forming.png" alt="Schematic p2p" width="600"></div>
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
-The parameters are:
+## Hardware setup and requirements
 
-* $U_{DC} = 40 V$
-* $R_{LOAD} = 30 \Omega$.
+The circuit diagram of the board is shown in the image below.
 
-## Software overview
+![circuit diagram](Image/circuit_diagram_provisory.png)
 
-### Import libraries
-This example depends on two libraries:
+The wiring diagram is shown in the figure below.
 
-1. control_library
-2. ScopeMimicry
+![wiring diagram](Image/wiring_diagram_provisory.png)
 
-To use them, you have to add the following lines in the `platformio.ini` file:
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 TWIST
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
+
+#### Main code structure
+
+The `main.cpp` structure is shown in the image below.
+
+![Code structure](Image/main_structure_provisory.png)
+
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
+
+The tasks are executed following the diagram below. 
+
+![Timing diagram](Image/timing_diagram_provisory.png)
+
+#### Control scheme
+
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
+
 ```
 lib_deps=
-    control_library = https://github.com/owntech-foundation/control_library.git
-    scope = https://github.com/owntech-foundation/scopemimicry.git 
+    control_lib = https://github.com/owntech-foundation/control_library.git
 ```
 
-### Define a regulator
-
-The voltage regulation will be done by a proportional resonant regulator.
-This component is provided by the OwnTech control library `control_lib`.
-
-The Proportional Resonant regulator is initialized with the lines above:
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
 
 ```cpp
-PrParams params = PrParams(Ts, Kp, Kr, w0, 0.0F, -Udc, Udc);
-prop_res.init(params);
+// Example controller init
+// pid.init(pid_params);
 ```
 
-The parameters are defined with these values:
+A control diagram placeholder is shown below.
 
-```cpp
-static Pr prop_res; // controller instantiation. 
-static float32_t Kp = 0.02F;
-static float32_t Kr = 4000.0F;
-static float32_t Ts = control_task_period * 1.0e-6F;
-static float32_t w0 = 2.0 * PI * 50.0;   // pulsation
-static float32_t Udc = 40.0F;
-```
+![Control diagram](Image/control_diagram_provisory.png)
 
-## Run the example
+## Expected result
 
-!!! tip Finger on the trigger
+This example should build and run on TWIST. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
 
-    To capture the current ripple you have to follow these steps:
-    - press the **`p`** key to go in `POWER_MODE`
-    - press the **`t`** key to activate the trigger of the `ScopeMimicry` instance.
-    - press the **`i`** key to come back in `IDLE_MODE`
-    - press the **`r`** key to retrieve the data.
+![serial monitor button](Image/serial_monitor_button_provisory.png)
 
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
 
-After these steps you should see in your directory a new folder called `Data_records` appear.
-Within it you will find three files with the following naming convention: 
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
 
-- `Year-month-day-hour-minute-second.txt` - a raw data file
-- `Year-month-day-hour-minute-second.csv` - a post-processed CSV file
-- `Year-month-day-hour-minute-second.png` - an automatically generated png file
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
 
-As an example here are two acquisitions:
+An example runtime interaction is shown below.
 
-![data records](Image/data_records.png)
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
 
-In the code there's some parameters you can change:
-- `num_trig_ratio_point`: it sets the number of trig_ratio values that will be swept
-  between `begin_trig_ratio` and `end_trig_ratio`
-- `begin_trig_ratio` : beginning value of the sweep.
-- `end_trig_ratio`: end value of the sweep.
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
 
+    A placeholder plot is shown below:
 
-### To view some variables
-After stopping, i.e. in IDLE mode, you can retrieve some data by pressing `r`. It calls a
-function `dump_scope_datas()` which sends to the console variables recorded during
-the power flow phase.
-
-
-
-## Link between voltage reference and duty cycles.
-The voltage source is defined by the voltage difference: $U_{12} = V_{1low} - V_{2low}$.
-
-Link with the duty cycle:
-
-* The leg1 is fixed in buck mode then: $V_{1low} = \alpha_1 . U_{DC}$
-* The leg2 is fixed in boost mode then: $V_{2low} = (1-\alpha_2) . U_{DC}$
-
-We change at the same time $\alpha_1$ and $\alpha_2$, then we have : $\alpha_1 = \alpha_2 = \alpha$. <br>
-And then: $U_{12} = (2.\alpha - 1).U_{DC}$
-
-$\alpha = \dfrac{U_{12}}{2.U_{DC}}  + 0.5$
+    ![result_plot](Image/result_plot_provisory.png)

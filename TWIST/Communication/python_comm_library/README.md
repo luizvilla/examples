@@ -1,117 +1,83 @@
 # Python Communication Protocol
 
-This example uses the Python communication protocol library to drive a Twist 1.4.1 board in buck mode.
+This example allows a user to control a Twist in DC-DC buck mode using a Python script. This example demonstrates the key setup, control flow, and expected outputs for this application.
 
-The script will send data to the board, retrieve the measurements and show them on a graph.
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
-!!! danger Advanced example
-     This is an advanced example. Make sure you are comfortable with using the [voltage mode](https://docs.owntech.org/examples/TWIST/DC_DC/buck_voltage_mode/) **before** doing this emulator.
+## Hardware setup and requirements
 
+The circuit diagram of the board is shown in the image below.
 
-## Hardware wiring and requirements
+![circuit diagram](Image/circuit_diagram_provisory.png)
 
-The wiring of the system is given by the image below:
-- The power converter is connected in `buck` mode with a source and a load.
-- `LEG1` and `LEG2` are connected in parallel on the low side, as shown in the figure below.
-- The converter is connected to the computer via its USB connector.
+The wiring diagram is shown in the figure below.
 
-![Communication setup](Image/Comm_system.png)
+![wiring diagram](Image/wiring_diagram_provisory.png)
 
-You will need:
-- 1 TWIST (it works with the OWNVERTER too!)
-- 1 DC power supply (20-60 V)
-- 1 power load
-- 1 PC
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 TWIST
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
-!!! warning Make sure you read this README all the way to the end
+#### Main code structure
 
-## Embedded Firmware setup
+The `main.cpp` structure is shown in the image below.
 
-We import the `communication_library` in `platformio.ini` via the line. Be careful to include the `#power_tuesday` at the end, since it will get the right version of the protocol:
+![Code structure](Image/main_structure_provisory.png)
 
-```ini
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
+
+The tasks are executed following the diagram below. 
+
+![Timing diagram](Image/timing_diagram_provisory.png)
+
+#### Control scheme
+
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
+
+```
 lib_deps=
-    comm_protocol = https://github.com/owntech-foundation/python_twist_comm_protocol.git#power_tuesday
+    control_lib = https://github.com/owntech-foundation/control_library.git
 ```
 
-## Embedded Firmware explanation
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
 
-The embedded firmware will configure the `TWIST` or `OWNVERTER` board to be able to communicate with your computer via Python. 
+```cpp
+// Example controller init
+// pid.init(pid_params);
+```
 
-The software deploys a communication system with three modes:
+A control diagram placeholder is shown below.
 
-1. **IDLE**
-   - :dart: in the application_task: stops broadcasting data
-   - :zap: in the critical_task: stops the power flow
+![Control diagram](Image/control_diagram_provisory.png)
 
-2. **POWER_OFF**
-   - :dart: in the application_task: broadcasts system status data on the serial port
-   - :zap: in the critical_task: stops the power flow
+## Expected result
 
-3. **POWER_ON**
-   - :dart: in the application_task: broadcasts sensor data on the serial port together with other data
-   - :zap: in the critical_task: starts the power flow, controls the power flow with a PID
+This example should build and run on TWIST. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
 
-!!! Tip How the system works
-    Characters are sent via the serial port to the `SPIN` board.
-    It parses these characters and decides which value to put in which variables that describe the power converter.
-    For more details, please check out the [communication protocol library README](https://github.com/owntech-foundation/python_twist_comm_protocol)
+![serial monitor button](Image/serial_monitor_button_provisory.png)
 
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
 
-## Python script
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
 
-The Python code handles communication, the voltage reference and plotting the data from the board.
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
 
-It will send a triangular waveform to the board and plot it in real-time.
+An example runtime interaction is shown below.
 
-!!! tip How the communication works
-    The script sends out a frame that is pre-structured to be parsed by the C code.
-    For instance:
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
 
-    ```python
-    Twist.sendCommand("LEG","LEG1","ON")
-    ```
-    Translates to
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
 
-    ```bash
-    s_LEG1_b_on
-    ```
+    A placeholder plot is shown below:
 
-    The `communication_task` on the Twist board will get the first character of the message using `console_getchar()`. And then it will call a handler using `initial_handle`.
-
-    ```c
-      void loop_communication_task()
-      {
-          received_char = console_getchar();
-          initial_handle(received_char);
-      }
-    ```
-
-    The handler will decide what the message is about and then update the appropriate structure of the communication protocol that handles the information.
-
-    Which activates the power leg `LEG1`.
-
-
-## Hardware setup
-
-This code was tested using the following hardware setup:
-
-![Emulator setup](Image/HIL_system_real.png)
-
-On the photo:
-  - A computer running the `comm_script.py` Python script.
-  - A Twist board connected in Buck mode.
-  - A voltage source.
-  - A resistor connected to `LEG1` and `LEG2`
-  - `LEG1` and `LEG2` connected in parallel.
-
-## How to use this example
-
-Before running the code
-
-!!! warning Make sure you have:
-    - `python` installed on your computer.
-    - that you follow the [firmware setup instructions](#embedded-firmware-setup) and have the appropriate libraries listed in `platformio.ini`.
-    - flash the `main.cpp` in your Twist board
-
-Once all of the above are OK, you can then run the `comm_script.py` script with your Python 3.
+    ![result_plot](Image/result_plot_provisory.png)

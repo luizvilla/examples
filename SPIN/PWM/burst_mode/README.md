@@ -1,98 +1,83 @@
-# Burst mode PWM
+# Setting Burst Mode PWM
 
-Burst mode is an advanced PWM capability. In a few words, instead of generating a continuous stream of pulses, burst mode sends groups of PWM (Pulse Width Modulation) signals at regular intervals. This method reduces energy consumption, minimizes heat generation, and is especially useful in applications like motor control, LED dimming, and power supplies.
+Setting pulsed mode PWM This example demonstrates the key setup, control flow, and expected outputs for this application.
 
-In power electronics, burst mode PWM is used to reduce losses under light load conditions.
-In this example we'll show you how to set up burst mode for two phase-shifted H-bridges.
-It could be used to control a Dual Active Bridge (DAB) in Single Phase Shift modulation under light load conditions.
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
 ## Hardware setup and requirements
 
-You will need:
+The circuit diagram of the board is shown in the image below.
 
-- A SPIN
-- A USB-C cable to supply the SPIN
-- An oscilloscope to observe PWM waveform
+![circuit diagram](Image/circuit_diagram_provisory.png)
 
-PWMs can be observed on:
-- Pin 12 and Pin 14 for PWMA
-- Pin 2 and Pin 4 for PWMC
-- Pin 10 and Pin 11 for PWME
-- Pin 7 and PIN 9 for PWMF
+The wiring diagram is shown in the figure below.
 
-## Software setup
+![wiring diagram](Image/wiring_diagram_provisory.png)
 
-During initialization:
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 SPIN
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
-- The frequency for the PWM is set to 200 kHz, you are free to choose another value.
-- PWMA and PWMC for the first H-bridge.
-- PWME and PWMF for the second H-bridge.
+#### Main code structure
 
-```cpp
-    spin.pwm.setFrequency(200000); // Set frequency of pwm
+The `main.cpp` structure is shown in the image below.
 
-    /* Set switch convention to have proper H bridges */
-    spin.pwm.setSwitchConvention(PWMC, PWMx2);
-    spin.pwm.setSwitchConvention(PWMF, PWMx2);
+![Code structure](Image/main_structure_provisory.png)
 
-    spin.pwm.initUnit(PWMA); // timer initialization
-    spin.pwm.initUnit(PWMC);
-    spin.pwm.initUnit(PWME);
-    spin.pwm.initUnit(PWMF);
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
+
+The tasks are executed following the diagram below. 
+
+![Timing diagram](Image/timing_diagram_provisory.png)
+
+#### Control scheme
+
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
+
+```
+lib_deps=
+    control_lib = https://github.com/owntech-foundation/control_library.git
 ```
 
-- All PWMs are initialized in phase.
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
 
 ```cpp
-    /* Set initial phase shifts*/
-    spin.pwm.setPhaseShift(PWMC, 0);
-    spin.pwm.setPhaseShift(PWME, 0);
-    spin.pwm.setPhaseShift(PWMF, 0);
+// Example controller init
+// pid.init(pid_params);
 ```
 
-Burst mode initialization:
+A control diagram placeholder is shown below.
 
-- Burst mode duty is set to 8. It means that PWM output will be off during 8 PWM events.
-- Burst mode period is set to 10. It means that PWM output will be off for 8 PWM events every 10 PWM events.
-
-```cpp
-uint8_t burst_duty = 8;
-uint8_t burst_period = 10;
-```
-
-```cpp
-    spin.pwm.initBurstMode();
-    spin.pwm.setBurstMode(burst_duty, burst_period);
-    spin.pwm.startBurstMode();
-```
+![Control diagram](Image/control_diagram_provisory.png)
 
 ## Expected result
 
-You can control the phase shift from the serial monitor :
-- press `u` to increase the phase shift
-- press `d` to decrease the phase shift
+This example should build and run on SPIN. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
 
-You can control the burst mode duty from the serial monitor :
-- press `e` to increase the burst mode duty
-- press `r` to decrease the burst mode duty
+![serial monitor button](Image/serial_monitor_button_provisory.png)
 
-You can control the burst mode period from the serial monitor :
-- press `t` to increase the burst mode period
-- press `y` to decrease the burst mode period
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
 
-On the oscilloscope you should observe:
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
 
-- That PWMs are ON only **two periods out of ten**
-- That you can control the burst duty and period to change the number of active PWM periods
-- That you can control the second H-bridge (PWME and PWMF) phase shift from the first H-bridge (PWMA, PWMC)
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
 
-**NB:**
+An example runtime interaction is shown below.
 
-PWMs can be observed on:
-- Pin 12 and Pin 14 for PWMA
-- Pin 2 and Pin 4 for PWMC
-- Pin 10 and Pin 11 for PWME
-- Pin 7 and PIN 9 for PWMF
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
 
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
 
-See [OwnPlot](https://github.com/owntech-foundation/OwnPlot) if you would like a better graphical interface for the serial monitor.
+    A placeholder plot is shown below:
+
+    ![result_plot](Image/result_plot_provisory.png)

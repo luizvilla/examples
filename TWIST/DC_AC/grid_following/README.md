@@ -1,102 +1,83 @@
-# AC current source follower
+# Grid Following Inverter
 
-In this example you need to have a first TWIST with the [Grid Forming](../grid_forming/README.md) example.
+It is an AC current source which follow a grid voltage. Commonly, a grid-following inverter adjusts its output to match the voltage and frequency of the existing electrical grid This example demonstrates the key setup, control flow, and expected outputs for this application.
 
-<div style="text-align:center"><img src="Image/schema_grid_following.png" alt="Schematic p2p" width="600"></div>
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
-The parameters are:
+## Hardware setup and requirements
 
-* $U_{DC} = 40 V$
-* $R_{LOAD} = 15 \Omega$.
+The circuit diagram of the board is shown in the image below.
 
-In the second Twist we use a software phase locked loop ( _"PLL"_ ).
-In this way we are synchronized with the grid voltage and we can then inject current
-with a power factor of one. The current is regulated using a proportional resonant (_"PR"_)
-regulator.
+![circuit diagram](Image/circuit_diagram_provisory.png)
 
-## Software overview
-### Import a library
+The wiring diagram is shown in the figure below.
 
-The _"PLL"_ and _"PR"_ are provided by the OwnTech control library which must be included 
-in the file `platformio.ini`.
+![wiring diagram](Image/wiring_diagram_provisory.png)
+
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 TWIST
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
+
+#### Main code structure
+
+The `main.cpp` structure is shown in the image below.
+
+![Code structure](Image/main_structure_provisory.png)
+
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
+
+The tasks are executed following the diagram below. 
+
+![Timing diagram](Image/timing_diagram_provisory.png)
+
+#### Control scheme
+
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
 
 ```
 lib_deps=
     control_lib = https://github.com/owntech-foundation/control_library.git
 ```
-### Define a regulator
 
-The Proportional Resonant regulator is initialized with the lines above:
-
-```cpp
-PrParams params = PrParams(Ts, Kp, Kr, w0, 0.0F, -Udc, Udc);
-prop_res.init(params);
-```
-
-The parameters are defined with these values:
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
 
 ```cpp
-static Pr prop_res; // controller instantiation. 
-static float32_t Kp = 0.2F;
-static float32_t Kr = 3000.0F;
-static float32_t Ts = control_task_period * 1.0e-6F;
-static float32_t w0 = 2.0 * PI * 50.0;   // pulsation
+// Example controller init
+// pid.init(pid_params);
 ```
 
-### Configure the PLL
+A control diagram placeholder is shown below.
 
-You have to define a PLL:
-```cpp
-static PllSinus pll;
-static PllDatas pll_datas;
-```
+![Control diagram](Image/control_diagram_provisory.png)
 
-Then initialize it:
-```
-float32_t rise_time = 50e-3;
-pll.init(Ts, Vgrid_amplitude, f0, rise_time);
-```
+## Expected result
 
-and use it:
-```cpp
-pll_datas = pll.calculateWithReturn(V1_low_value - V2_low_value);
-```
+This example should build and run on TWIST. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
 
-The calculation returns a structure with 3 fields:
+![serial monitor button](Image/serial_monitor_button_provisory.png)
 
-1. the pulsation `w` in [rad/s]
-2. the angle `angle` in [rad]
-3. the angle error `error` in [rad/s]
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
 
-## Link between voltage output and duty cycle
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
 
-The voltage source is defined by the voltage difference: $U_{12} = V_{1low} - V_{2low}$.
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
 
-Link with the duty cycle:
+An example runtime interaction is shown below.
 
-* The leg1 is fixed in buck mode then: $V_{1low} = \alpha_1 . U_{DC}$
-* The leg2 is fixed in boost mode then: $V_{2low} = (1-\alpha_2) . U_{DC}$
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
 
-We change at the same time $\alpha_1$ and $\alpha_2$, then we have : $\alpha_1 = \alpha_2 = \alpha$. <br>
-And then: $U_{12} = (2.\alpha - 1).U_{DC}$
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
 
-$\alpha = \dfrac{U_{12}}{2.U_{DC}}  + 0.5$
+    A placeholder plot is shown below:
 
-## Retrieve recorded data
-
-After stopping, i.e. in IDLE mode, you can retrieve some data by pressing `r`. It calls a
-function `dump_scope_datas()` which sends to the console variables recorded during
-the power flow phase.
-
-But before running, you have to add one line in the file `platformio.ini`
-
-```ini
-monitor_filters = recorded_datas
-```
-
-And you have to put the Python script `filter_datas_recorded.py` in a `monitor` directory
-which must be in your parent project directory. Then the script should capture the
-console stream to put it in a TXT file named `year-month-day_hour_minutes_seconds_record.txt`.
-
-These files can be plotted using the `plot_data.py` Python script if you have the
-`matplotlib` and `numpy` modules installed.
+    ![result_plot](Image/result_plot_provisory.png)

@@ -1,89 +1,83 @@
-# Field Oriented Control with Hall sensors
+# Motor control using FOC and hall sensors
 
-## Introduction.
+an example which show the use of a Field Oriented Control algorithm with discrete hall sensors This example demonstrates the key setup, control flow, and expected outputs for this application.
 
-This example shows how to regulate the torque in a Permanent Magnet Synchronous Machine
-(PMSM) using a Field Oriented Control (FOC) algorithm. 
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
-The FOC is well adapted to PMSM with sinusoidal back-EMF (electromotive
-forces). The FOC algorithm generates smooth torque values. 
-The current regulators (Proportional-Integral) are in the _"dq"_ frame where values
-should be constant during steady state operation.
+## Hardware setup and requirements
 
-To apply this technique we should have an acquisition of a continuous angle value [0, 2π[.
-But for _"cost"_ reasons or integrations with other algorithms (BLDC), some motors have
-only 3 discrete hall sensors value to indicate the rotor position.
+The circuit diagram of the board is shown in the image below.
 
-In this case we use a PLL (phase-locked loop) filter to _"build"_ a continuous equivalent
-angle from the 3 discrete signals. 
+![circuit diagram](Image/circuit_diagram_provisory.png)
 
-![](Images/foc_hall_scheme.png)
+The wiring diagram is shown in the figure below.
 
-## Import libraries to use it.
+![wiring diagram](Image/wiring_diagram_provisory.png)
 
-This example uses some software components which are in the OwnTech `control_library`.
-Then you must import it by inserting the following line in the `platformio.ini` file.
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 OWNVERTER
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
-```ini 
+#### Main code structure
+
+The `main.cpp` structure is shown in the image below.
+
+![Code structure](Image/main_structure_provisory.png)
+
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
+
+The tasks are executed following the diagram below. 
+
+![Timing diagram](Image/timing_diagram_provisory.png)
+
+#### Control scheme
+
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
+
+```
 lib_deps=
- control_library = https://github.com/owntech-foundation/control_library.git
- scopemimicry = https://github.com/owntech-foundation/scopemimicry.git
+    control_lib = https://github.com/owntech-foundation/control_library.git
 ```
 
-## How the _"sector"_ table is built.
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
 
-According to the _"dq"_ transformation, the formula of the back EMF should be:
+```cpp
+// Example controller init
+// pid.init(pid_params);
+```
 
-$E_{u} = - K_{fem}.\omega .sin(\theta)$
+A control diagram placeholder is shown below.
 
-$E_{v} = - K_{fem}.\omega .sin(\theta - 2\pi/3)$
+![Control diagram](Image/control_diagram_provisory.png)
 
-$E_{w} = - K_{fem}.\omega .sin(\theta - 4\pi/3)$
+## Expected result
 
-Where $\theta$ is the _"electric"_ angle and $\omega$ is the _"electric"_ pulsation.
+This example should build and run on OWNVERTER. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
 
-For simplicity reasons we assume that the value $K_{fem}.\omega = 1$.
+![serial monitor button](Image/serial_monitor_button_provisory.png)
 
-Then the Hall sensors must be synchronized with the back-EMF as follows:
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
 
-![](Images/bemf_and_hall.png)
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
 
-According these assumptions, we define a variable `hall_index` which is computed as:
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
 
-$hall_{index} = Hall_u . 2^0+ Hall_v . 2^1  + Hall_w . 2^2$
+An example runtime interaction is shown below.
 
-We also define a `sector` variable which evolves like a quantification of a continuous
-angle value, then we can make a lookup table between these two variables.
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
 
-![](Images/sector_and_hall_idx.png)
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
 
-| sector | hall_index |
-| ---    | ---        |
-| 0      | 3          |
-| 1      | 2          |
-| 2      | 6          |
-| 3      | 4          |
-| 4      | 5          |
-| 5      | 1          |
+    A placeholder plot is shown below:
 
-## Use this example
-
-- Wire the motor Hall effect sensors and power phases. The colors of the Hall effect sensors should match the color of the power phases. 
-- Flash the example to the OWNVERTER board.
-- In the serial terminal press `p` to start the motor.
-- At that point, there is no torque reference as `Iq_ref` is equal to `0`.
-- Increase the torque reference by pressing `u`. The torque reference is incremented by `0.1 A`.
-- Increase the torque reference until the motor starts spinning.
-- Stop the motor by pressing `i`.
-- You can retrieve a live record by pressing `r`. It will download a data record containing all declared scope values.
-  - By default the recording is triggered by entering `power mode` (by pressing `p`).
-  - Alternatively you can press `q` to trigger manually the recording at a different instant, or to reset the trigger
-- Plot the values by clicking `Plot recording` in `OwnTech` PlatformIO actions.
-- Live data records can also be plotted using OwnPlot by pressing `m`. This way, the recording will be sent as an infinite loop to OwnPlot.
-
-| Control state | Comment |
-| ---    | ---        |
-| 0      | In this state, the controller is calculating the current offset      |
-| 1      | In this state, the controller is idle          |
-| 2      | In this state, the controller is in power mode          |
-| 3      | In this state, the controller is in error mode. The error mode is entered by repeatedly (as defined by `error_counter`) fulfilling the following condition: `I1_Low` going beyond the bounds `[-AC_CURRENT_LIMIT;+AC_CURRENT_LIMIT]`, `I2_Low` going beyond the bounds `[-AC_CURRENT_LIMIT;+AC_CURRENT_LIMIT]` or `I_High` exceeding `DC_CURRENT_LIMIT` |
+    ![result_plot](Image/result_plot_provisory.png)

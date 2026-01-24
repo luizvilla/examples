@@ -1,43 +1,83 @@
-# Generating waveform with DAC
+# DAC signal generation
 
-A DAC, or Digital-to-Analog Converter, converts digital signals into corresponding analog signals. It achieves this by assigning digital values to specific voltage, effectively generating continuous analog waveforms from discrete digital data. This functionality makes DACs essential for generating various waveforms in electronic systems.
+Sawtooth generation with DAC This example demonstrates the key setup, control flow, and expected outputs for this application.
+
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
 ## Hardware setup and requirements
 
-![Schematic](Image/schema.png)
-*figure 1*
+The circuit diagram of the board is shown in the image below.
 
-You will need: 
+![circuit diagram](Image/circuit_diagram_provisory.png)
 
-- 1 SPIN
-- A USB-C cable to supply power to the SPIN, and also upload the code from a computer
-- An oscilloscope to watch the DAC output
+The wiring diagram is shown in the figure below.
 
-Connect the oscilloscope to GPIO PA6 (the DAC output).
+![wiring diagram](Image/wiring_diagram_provisory.png)
 
-## Software setup 
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 SPIN
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
-In this example we will use DAC 2 channel 1 to output a sawtooth signal. 
+#### Main code structure
 
-We start by initializing the DAC :
+The `main.cpp` structure is shown in the image below.
 
-```cpp
-    spin.dac.initConstValue(2); // DAC 2 initialization
-    spin.dac.setConstValue(2, 1, 0); // Setting DAC 2 channel 1 to 0
+![Code structure](Image/main_structure_provisory.png)
+
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
+
+The tasks are executed following the diagram below. 
+
+![Timing diagram](Image/timing_diagram_provisory.png)
+
+#### Control scheme
+
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
+
+```
+lib_deps=
+    control_lib = https://github.com/owntech-foundation/control_library.git
 ```
 
-The function `setConstValue` will convert a numerical value (from 0 to 4096) to a voltage (between 0 and 2.048) with the DAC. 
-
-In the background task (called every 100 ms), the code increases the value sent to the DAC: 
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
 
 ```cpp
-    dac_value = (dac_value + 100)%4096;
-    spin.dac.setConstValue(2, 1, dac_value);
+// Example controller init
+// pid.init(pid_params);
 ```
 
-You can also reproduce the same step to use DAC1 channel 1 localized in GPIO PA4.
+A control diagram placeholder is shown below.
 
+![Control diagram](Image/control_diagram_provisory.png)
 
 ## Expected result
 
-You should see a sawtooth on the DAC output.
+This example should build and run on SPIN. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
+
+![serial monitor button](Image/serial_monitor_button_provisory.png)
+
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
+
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
+
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
+
+An example runtime interaction is shown below.
+
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
+
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
+
+    A placeholder plot is shown below:
+
+    ![result_plot](Image/result_plot_provisory.png)

@@ -1,53 +1,83 @@
-# Parallel Power Conversion Experiment - Code Example
+# DC droop
 
-## Overview
+implementation of DC droop in microgrid This example demonstrates the key setup, control flow, and expected outputs for this application.
 
-This code example demonstrates an experiment involving three power converters connected in parallel to power a DC bus without communication. Each converter performs power conversion in buck mode and is programmed with a distinct droop factor (1.2, 1.1, and 1.6 respectively). The experiment aims to explore the behavior of parallel power conversion and observe the impact of different droop factors on the voltage regulation.
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
-## Experimental Setup
+## Hardware setup and requirements
 
-- Three power converters are connected in parallel to the DC bus.
-- Each power converter operates in voltage control mode and performs power conversion in buck mode.
-- Individual droop factors of 1.2, 1.1, and 1.6 are programmed for the respective cards.
+The circuit diagram of the board is shown in the image below.
 
-| Connection diagram | Microgrid structure |
-| ------ | ------ |
-|   <img src="Image/droop.png" alt="Droop connexion diagram">| <img src="Image/droopss.png" alt="Microgrid structure">|
+![circuit diagram](Image/circuit_diagram_provisory.png)
 
+The wiring diagram is shown in the figure below.
 
-## Code Usage
+![wiring diagram](Image/wiring_diagram_provisory.png)
 
-1. Flash `src/main.cpp` to each of the power converters.
-2. In the `main.cpp` file, go to line 80 to find the macro definition:
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 TWIST
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
-   ```cpp
-   #define DROOP
-   ```
+#### Main code structure
 
-   Replace this macro with the relevant option for the board you are flashing:
+The `main.cpp` structure is shown in the image below.
 
-   For a different board:
-   ```cpp
-   #define DROOP1
-   ```
-   
-   or
-   
-   ```cpp
-   #define DROOP2
-   ```
+![Code structure](Image/main_structure_provisory.png)
 
-## Example Workflow
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
 
-1. **Parallel Power Conversion:**
-   - Three power converters are interconnected in parallel to supply power to the DC bus.
-   - Each converter performs power conversion using a buck mode.
-   - Individual droop factors (1.2, 1.1, and 1.6) are applied to each converter.
+The tasks are executed following the diagram below. 
 
-2. **Voltage Regulation:**
-   - Monitor the behavior of the parallel power conversion system and observe how it manages voltage regulation under different conditions.
-   - Analyze the role of each card's droop factor in distributing the load and regulating the voltage on the DC bus.
+![Timing diagram](Image/timing_diagram_provisory.png)
 
-## Conclusion
+#### Control scheme
 
-By following the provided guidelines and uploading the code to the power cards, you can emulate and study the dynamics of parallel power conversion in buck mode. This experiment allows you to investigate the impact of varied droop factors on voltage regulation and observe how the power cards work together in parallel to provide power to the DC bus. The combination of voltage control, buck mode operation, and unique droop factors contributes to an efficient and synchronized power conversion system.
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
+
+```
+lib_deps=
+    control_lib = https://github.com/owntech-foundation/control_library.git
+```
+
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
+
+```cpp
+// Example controller init
+// pid.init(pid_params);
+```
+
+A control diagram placeholder is shown below.
+
+![Control diagram](Image/control_diagram_provisory.png)
+
+## Expected result
+
+This example should build and run on TWIST. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
+
+![serial monitor button](Image/serial_monitor_button_provisory.png)
+
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
+
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
+
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
+
+An example runtime interaction is shown below.
+
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
+
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
+
+    A placeholder plot is shown below:
+
+    ![result_plot](Image/result_plot_provisory.png)

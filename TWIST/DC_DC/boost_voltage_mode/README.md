@@ -1,9 +1,9 @@
-# Boost with PID controlled output voltage
+# Voltage Mode Boost
 
-A voltage mode boost converter regulates voltage by comparing the output voltage to a reference voltage. It adjusts the duty cycle of its switching signal to keep the output voltage stable. This type of converter efficiently steps up voltage levels, making it useful in various electronic devices such as for converting photovoltaic panel voltage.
+Voltage mode boost converter using PID controller for TWIST This example demonstrates the key setup, control flow, and expected outputs for this application.
 
-This example will implement a voltage mode boost converter to control the output.
-
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
 ## Hardware setup and requirements
 
@@ -11,21 +11,15 @@ The circuit diagram of the board is shown in the image below.
 
 ![circuit diagram](Image/circuit_diagram.png)
 
-
-The power flows from `V1Low` to `V_high`. The wiring diagram is shown in the figure below.
-
+The wiring diagram is shown in the figure below.
 
 ![wiring diagram](Image/wiring_diagram.png)
 
-
-You will need:
-- 1 TWIST
-- A DC power supply (**max 10 V**)
-- A resistor (or a DC electronic load)
-
-## Software setup and structure
-
-The example is built using the `main.cpp` file and the `control` library.
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 TWIST
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
 #### Main code structure
 
@@ -33,53 +27,57 @@ The `main.cpp` structure is shown in the image below.
 
 ![Code structure](Image/main_structure.png)
 
-The code structure is as follows:
-- On the top of the code some initialization functions take place.
-- **Setup Routine** - calls functions that set the hardware and software
-- **Communication Task** - Handles the keyboard communication and decides which `MODE` is activated
-- **Application Task** - Handles the `MODE`, activates the LED and prints data on the serial port 
-- **Critical Task** - Handles the `MODE`, sets power ON/OFF and tracks the `V_high` variable with a `PID`
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
 
 The tasks are executed following the diagram below. 
 
-
 ![Timing diagram](Image/timing_diagram.png)
-
-
-- **Communication Task** - Is awakened regularly to verify any keyboard activity
-- **Application Task** - This task is woken once its suspension is finished 
-- **Critical Task** - This task is driven by the HRTIM count interrupt, where it counts a number of HRTIM switching frequency periods. In this case 100us, or 20 periods of the TWIST board 200kHz switching frequency set by default.
-
-
 
 #### Control scheme
 
-The control library is imported in `platformio.ini` via the line:
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
 
 ```
 lib_deps=
     control_lib = https://github.com/owntech-foundation/control_library.git
 ```
 
-We can use this library to initialize a PID control with the function :
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
 
 ```cpp
-pid.init(pid_params);
+// Example controller init
+// pid.init(pid_params);
 ```
 
-The control diagram of the `PID` is shown in the figure below.
+A control diagram placeholder is shown below.
 
 ![Control diagram](Image/control_diagram.png)
 
-
 ## Expected result
 
-This code will control the output voltage to have 15 V. You can control the output voltage with the serial monitor:
+This example should build and run on TWIST. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
 
-- press `u` to increase the voltage reference by 0.5 V
-- press `d` to decrease the voltage reference by 0.5 V
+![serial monitor button](Image/serial_monitor_button_provisory.png)
 
-The following plot shows the expected result. Here the voltage reference was modified and `V_High` can be seen to follow it. 
-Both currents are negative, as the current measurement `I_High` is in the `load` convention and the current measurement `I1_low` is in `source` convention.  
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
 
-![Expected result](Image/result_plot.png)
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
+
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
+
+An example runtime interaction is shown below.
+
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
+
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
+
+    A placeholder plot is shown below:
+
+    ![result_plot](Image/result_plot.png)

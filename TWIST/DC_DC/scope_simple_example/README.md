@@ -1,76 +1,83 @@
-# Scope simple example
+# Simple scope example
 
-The scope is a powerful tool to inspect electric signals in real time. In this example we will visualize a simple step response of the `LEG1` PID.
-
-This example will implement a voltage mode buck converter to control the output.
+Simple example of triggering the scope to acquire a step response. This example demonstrates the key setup, control flow, and expected outputs for this application.
 
 !!! warning "Are you ready to start?"
     Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
 ## Hardware setup and requirements
 
+The circuit diagram of the board is shown in the image below.
 
-![schema](Image/buck_m.png)
+![circuit diagram](Image/circuit_diagram.png)
+
+The wiring diagram is shown in the figure below.
+
+![wiring diagram](Image/wiring_diagram.png)
 
 !!! warning Hardware pre-requisites 
     You will need:
     - 1 TWIST
-    - A DC power supply (20-60 V)
-    - A resistor (or a DC electronic load)
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
-## Software setup
+#### Main code structure
 
-The software should work out of the box. Build and upload it to the board.
+The `main.cpp` structure is shown in the image below.
 
-The data to be saved to the scope is structured in the `setup_routine`.
+![Code structure](Image/main_structure.png)
 
-```cpp
-    scope.connectChannel(I1_low_value, "I1_low");
-    scope.connectChannel(V1_low_value, "V1_low");
-    scope.connectChannel(I2_low_value, "I2_low");
-    scope.connectChannel(V2_low_value, "V2_low");
-    scope.connectChannel(duty_cycle, "duty_cycle");
-    scope.connectChannel(V_high, "V_high");
-    scope.set_trigger(&a_trigger);
-    scope.set_delay(0.2F);
-    scope.start();
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
+
+The tasks are executed following the diagram below. 
+
+![Timing diagram](Image/timing_diagram.png)
+
+#### Control scheme
+
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
 
 ```
-Where the voltages and currents of `LEG1` and `LEG2`, the `duty_cycle` and the `V_HIGH` are going to be saved. The delay to apply the trigger is 20% of all the measurements. 
+lib_deps=
+    control_lib = https://github.com/owntech-foundation/control_library.git
+```
+
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
+
+```cpp
+// Example controller init
+// pid.init(pid_params);
+```
+
+A control diagram placeholder is shown below.
+
+![Control diagram](Image/control_diagram.png)
 
 ## Expected result
 
-This code will control the output voltage to have 15 V. You can control the output voltage with the PlatformIO serial monitor. The image below shows you a snippet of the window and the button to press.
+This example should build and run on TWIST. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
 
 ![serial monitor button](Image/serial_monitor_button.png)
 
-When opening it for the first time, the serial monitor will give you an initialization message regarding the parameters of the ADCs as shown below.  
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
 
 ![serial monitor initialization](Image/serial_monitor_initialization.png)
 
 !!! tip Command keys
-    - press `u` to increase the voltage
-    - press `d` to decrease the voltage
-    - press `a` to increase the voltage step to be applied
-    - press `z` to decrease the voltage step to be applied
-    - press `s` to apply the voltage step and automatically retrieve the data
-    - press `r` to retrieve the data
-    - press `h` to show the help menu
+    Use the serial help menu printed by the example (if any) to discover available commands.
 
+An example runtime interaction is shown below.
+
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
 
 !!! note The data that you see
-    When you send `p` the Twist board will send you back a stream of data on the following format: 
-    
-    ```c 
-    I1:V1:I2:V2:IH:VH:VREF:VSTEP
-    ```
-    Where: 
-    - `I1` is the current in `LEG1` of the `LOW` side
-    - `V1` is the voltage in `LEG1` of the `LOW` side
-    - `I2` is the current in `LEG1` of the `LOW` side
-    - `V2` is the voltage in `LEG2` of the `LOW` side
-    - `IH` is the current in `LEG2` of the `LOW` side
-    - `VH` is the voltage on the `HIGH` side
-    - `VREF` is the reference voltage set for `LEG1` and `LEG2` of the `LOW` side which is applied during `POWER` mode.
-    - `VSTEP` is the size of the voltage step to be applied for the test. 
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
 
+    A placeholder plot is shown below:
+
+    ![result_plot](Image/result_plot.png)

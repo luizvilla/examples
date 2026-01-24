@@ -1,31 +1,25 @@
-# Buck with PID controlled output voltage
+# Voltage Mode Buck
 
-A voltage mode buck converter regulates voltage by comparing the output voltage to a reference voltage. It adjusts the duty cycle of its switching signal to keep the output voltage stable. This type of converter efficiently steps down voltage levels, making it useful in various electronic devices like an embedded battery charger.
-
-This example will implement a voltage mode buck converter to control the output.
+Voltage mode buck converter using PID controller for TWIST This example demonstrates the key setup, control flow, and expected outputs for this application.
 
 !!! warning "Are you ready to start?"
     Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
 ## Hardware setup and requirements
 
-
-
 The circuit diagram of the board is shown in the image below.
 
 ![circuit diagram](Image/circuit_diagram.png)
 
-
-The power flows from `VHigh` to `VLow`. The wiring diagram is shown in the figure below.
-
+The wiring diagram is shown in the figure below.
 
 ![wiring diagram](Image/wiring_diagram.png)
 
 !!! warning Hardware pre-requisites 
     You will need:
     - 1 TWIST
-    - A dc power supply (20-60V)
-    - A resistor (or a dc electronic load)
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
 #### Main code structure
 
@@ -33,91 +27,57 @@ The `main.cpp` structure is shown in the image below.
 
 ![Code structure](Image/main_structure.png)
 
-The code structure is as follows:
-- On the top of the code some initialization functions take place.
-- **Setup Routine** - calls functions that set the hardware and software
-- **Communication Task** - Handles the keyboard communication and decides which `MODE` is activated
-- **Application Task** - Handles the `MODE`, activates the LED and prints data on the serial port 
-- **Critical Task** - Handles the `MODE`, sets power ON/OFF and tracks the `V1_low_value` variable with a `PID`
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
 
 The tasks are executed following the diagram below. 
 
-
 ![Timing diagram](Image/timing_diagram.png)
-
-
-- **Communication Task** - Is awakened regularly to verify any keyboard activity
-- **Application Task** - This task is woken once its suspension is finished 
-- **Critical Task** - This task is driven by the HRTIM count interrupt, where it counts a number of HRTIM switching frequency periods. In this case 100us, or 20 periods of the TWIST board 200kHz switching frequency set by default.
-
-
 
 #### Control scheme
 
-The control library is imported in `platformio.ini` via the line:
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
 
 ```
 lib_deps=
     control_lib = https://github.com/owntech-foundation/control_library.git
 ```
 
-We can use this library to initialize a PID control with the function :
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
 
 ```cpp
-pid.init(pid_params);
+// Example controller init
+// pid.init(pid_params);
 ```
 
-The control diagram of the `PID` is shown in the figure below.
+A control diagram placeholder is shown below.
 
 ![Control diagram](Image/control_diagram.png)
 
-
-
 ## Expected result
 
-This code will control `V1low` and `V2low` voltages so that they follow a `voltage_reference`. You can control this reference through the PlatformIO serial monitor. The image below shows you a snippet of the window and the button to press.
+This example should build and run on TWIST. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
 
 ![serial monitor button](Image/serial_monitor_button.png)
 
-When opening it for the first time, the serial monitor will give you an initialization message regarding the parameters of the ADCs as shown below.  
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
 
 ![serial monitor initialization](Image/serial_monitor_initialization.png)
 
 !!! tip Command keys
-    - press `u` to increase the voltage
-    - press `d` to decrease the voltage
-    - press `h` to show the help menu
+    Use the serial help menu printed by the example (if any) to discover available commands.
 
-Here's the sequence when the help menu is activated with `h`, the power mode is then activated with `p` and finally the Twist converter is put in idle with the `i`. 
+An example runtime interaction is shown below.
 
 ![serial monitor working](Image/serial_monitor_operation.gif)
 
 !!! note The data that you see
-    When you send `p` the Twist board will send you back a stream of data on the following format: 
-    
-    ```c 
-    I1:V1:VREF:I2:V2:VREF:IH:VH:T1:T2:
-    ```
-    Where: 
-    - `I1` is the current in `LEG1` of the `LOW` side
-    - `V1` is the voltage in `LEG1` of the `LOW` side
-    - `VREF` is the reference voltage set for `LEG1` and `LEG2` of the `LOW` side
-    - `I2` is the current in `LEG1` of the `LOW` side
-    - `V2` is the voltage in `LEG2` of the `LOW` side
-    - `VREF` is the reference voltage set for `LEG1` and `LEG2` of the `LOW` side
-    - `IH` is the current in `LEG2` of the `LOW` side
-    - `VH` is the voltage on the `HIGH` side
-    - `T1` is the temperature from the NTC thermistor in `LEG1` of the `LOW` side
-    - `T2` is the temperature from the NTC thermistor in `LEG2` of the `LOW` side
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
 
-    For instance, when you retrieve this: 
-
-    ```c 
-    1.44:14.80:0.13:16.14:1.14:22.82:
-    ```
-
-    It means that `I1 = 1.46 A`, `V1 = 14.80 V` and so on. 
-
-    If you plot your data with a Python code, you will see something similar to this: 
+    A placeholder plot is shown below:
 
     ![result_plot](Image/result_plot.png)

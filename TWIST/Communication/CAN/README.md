@@ -1,72 +1,83 @@
-# CAN Communication Example
-This example shows how to use the CAN interface present on both TWIST
-and OWNVERTER power shields.
+# CAN Communication
 
-# CAN protocol
-Data uses the Thingset protocol. The full specification can be accessed here:
-[thingset](https://thingset.io)
+This example deploys CAN communication of the Twist board This example demonstrates the key setup, control flow, and expected outputs for this application.
 
-# Using CAN on OwnTech boards
-CAN-related functions can be used by typing
-`communication.can.` in your main.cpp file.
-Autocompletion will give you insights into available API functions.
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
-Currently the API supports two modes :
-- Sending reports containing data over CAN, in this example live measurements
-- Sending control commands over CAN
+## Hardware setup and requirements
 
-For now, two simple commands are supported:
-- Sending a floating point reference.
-- Sending a start-stop boolean.
+The circuit diagram of the board is shown in the image below.
 
-# App.conf
-The `app.conf` file allows you to simply add complex modules. In this example, CAN
-communication is enabled by setting
+![circuit diagram](Image/circuit_diagram_provisory.png)
 
-```CONFIG_OWNTECH_COMMUNICATION_ENABLE_CAN=y```
+The wiring diagram is shown in the figure below.
 
-Multiple configurations can be set or unset.
+![wiring diagram](Image/wiring_diagram_provisory.png)
 
-You might want to run GUIconfig in `OwnTech -> [Advanced] Run GUIconfig` to get
-extra information on available options that can be defined in `app.conf`.
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 TWIST
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
-Relevant configs are found in `Modules->thingset-sdk->Thingset SDK->CAN interface`
+#### Main code structure
 
-# user_data_objects.h
-This new file is a manifest that permits the user to define custom values that
-should be broadcast over CAN.
+The `main.cpp` structure is shown in the image below.
 
-Follow the syntax provided with the default measurements to add yours.
-We also strongly suggest reading the [Thingset protocol specification](https://thingset.io/spec/v0.6/introduction/abstract.html).
+![Code structure](Image/main_structure_provisory.png)
 
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
 
-# Using a CAN dongle adapter to read CAN frames on a computer
+The tasks are executed following the diagram below. 
 
-Make sure you have a suitable hardware adapter to link `RJ45` terminals of the
-OwnTech board to the `D Sub - 15` terminal of the adapter. `GND` `CAN-RX` and
-`CAN-TX` are required to be able to receive and send messages.
+![Timing diagram](Image/timing_diagram_provisory.png)
 
-PEAK CAN-to-USB adapter is supported. It works natively on Linux.
-The following configuration should also work for other CAN dongle adapters,
-granted that you've installed any required driver.
+#### Control scheme
 
-To visualize the CAN data stream
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
 
-1. Open a terminal
-2. Set dongle parameters ``` sudo ip link set can0 type can bitrate 500000 restart-ms 500 ```
-3. Enable can interface  ``` sudo ip link set can0 up ```
-4. Dump the data stream  ``` candump can0 ```
+```
+lib_deps=
+    control_lib = https://github.com/owntech-foundation/control_library.git
+```
 
-# Using Download Firmware Upgrade over CAN
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
 
-Now that the CAN interface is running, you can take advantage of it to download
-new firmware through CAN as well.
+```cpp
+// Example controller init
+// pid.init(pid_params);
+```
 
-For that :
+A control diagram placeholder is shown below.
 
-1. Set the CAN to USB interface
-``` sudo ip link set can0 type can bitrate 500000 restart-ms 500 ```
-2. Enable the CAN interface ``` sudo ip link set can0 up ```
-3. Build your firmware as you would do normally.
-4. Once built execute the following script from a terminal
-``` ~/.platformio/packages/framework-zephyr/_pio/thingset-zephyr-sdk/scripts/thingset-dfu-can.py -t 1 .pio/build/USB/firmware.mcuboot.bin ```
+![Control diagram](Image/control_diagram_provisory.png)
+
+## Expected result
+
+This example should build and run on TWIST. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
+
+![serial monitor button](Image/serial_monitor_button_provisory.png)
+
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
+
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
+
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
+
+An example runtime interaction is shown below.
+
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
+
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
+
+    A placeholder plot is shown below:
+
+    ![result_plot](Image/result_plot_provisory.png)

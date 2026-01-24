@@ -1,57 +1,83 @@
-# Triggering measure from ADC via software trigger
+# Software triggered ADC
 
-An ADC, or Analog-to-Digital Converter, is a crucial component in modern electronics that converts continuous analog signals into discrete digital data. In simpler terms, it takes real-world phenomena, like sound or temperature, and turns them into numbers that a computer can understand and process. This conversion is essential for various applications, in power electronics it allows us to get real-time measurements from the circuit like voltage and current. 
+setting the adc to be trigerred by software This example demonstrates the key setup, control flow, and expected outputs for this application.
 
-This example will show you how to get measurements from the ADC by calling a function that will trigger the measurements: this is what we call **a software trigger**.
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
 ## Hardware setup and requirements
 
-![Schematic](Image/schema.png)
+The circuit diagram of the board is shown in the image below.
 
-You will need: 
+![circuit diagram](Image/circuit_diagram_provisory.png)
 
-- 1 SPIN
-- A USB-C cable to supply power to the SPIN, and also upload the code from a computer
-- A signal generator to create a waveform to measure it from the ADC, it can be a sine wave, triangle wave...etc. This signal must be between **0 V and 2.048 V**
+The wiring diagram is shown in the figure below.
 
-Connect the signal generator to pin C4, and GND. 
+![wiring diagram](Image/wiring_diagram_provisory.png)
 
-## Software setup 
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 SPIN
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
-The ADC 2 is used here, it is initialized like this : 
+#### Main code structure
+
+The `main.cpp` structure is shown in the image below.
+
+![Code structure](Image/main_structure_provisory.png)
+
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
+
+The tasks are executed following the diagram below. 
+
+![Timing diagram](Image/timing_diagram_provisory.png)
+
+#### Control scheme
+
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
+
+```
+lib_deps=
+    control_lib = https://github.com/owntech-foundation/control_library.git
+```
+
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
 
 ```cpp
-    spin.adc.configureTriggerSource(2, software); // ADC 2 configured in software mode
-```
-We use the 5th channel of the ADC, which is the GPIO C4 on the SPIN (also numbered as pin 35). To enable the acquisition from this pin, we use the function `enableAcquisition`: 
-
-```cpp
-data.enableAcquisition(2, 35) // Enable acquisition for ADC2, for channel 5 (localized in GPIO C4 / pin number 35)
-```
-When we want to retrieve measurements from ADC2 all we need to do is trigger ADC2 and retrieve the measured value in GPIO C4 / pin number 35:
-
-```cpp
-   spin.data.triggerAcquisition(2);
-    adc_value =spin.data.getLatestValue(2, 35);
+// Example controller init
+// pid.init(pid_params);
 ```
 
-There is a total of 8 possible pins from where you can get analog measurements:
+A control diagram placeholder is shown below.
 
-| GPIO | PIN number | ADC and channels                |
-|------|------------|---------------------------------|
-| PC4  | 35         | ADC2 channel 5                  |
-| PA1  | 30         | ADC1 channel 2 / ADC2 channel 2 |
-| PA0  | 29         | ADC1 channel 1 / ADC2 channel 1 |
-| PC3  | 27         | ADC1 channel 9 / ADC2 channel 9 |
-| PC2  | 26         | ADC1 channel 8 / ADC2 channel 8 |
-| PC1  | 25         | ADC1 channel 7 / ADC2 channel 7 |
-| PC0  | 24         | ADC1 channel 6 / ADC2 channel 6 |
-| PB15 | 6          | ADC4 channel 5                  |
+![Control diagram](Image/control_diagram_provisory.png)
 
-You can configure any of the above ADCs with the same steps.
+## Expected result
 
-## Expected results
+This example should build and run on SPIN. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
 
-The analog value measured from the ADC is stored inside the variable `adc_value`, which is printed in the serial monitor every 100 ms. You can then watch the measurements on [OwnPlot](https://github.com/owntech-foundation/OwnPlot). 
+![serial monitor button](Image/serial_monitor_button_provisory.png)
 
-If everything went correctly, you should observe the same waveform on OwnPlot that you generate via the signal generator. 
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
+
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
+
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
+
+An example runtime interaction is shown below.
+
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
+
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
+
+    A placeholder plot is shown below:
+
+    ![result_plot](Image/result_plot_provisory.png)

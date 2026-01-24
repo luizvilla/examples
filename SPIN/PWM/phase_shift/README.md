@@ -1,62 +1,83 @@
-# Phase shifting PWM
+# Setting PWM phase shift
 
-Phase shift in Pulse Width Modulation (PWM) refers to the intentional offset of the timing between multiple PWM signals. This offset alters the switching instants of the signals, affecting the distribution of power delivery and minimizing ripple in power electronic systems.
+Setting a phase shift between two PWM This example demonstrates the key setup, control flow, and expected outputs for this application.
 
-Phase shifting PWM is used in interleaved topology for power electronics. In this example we'll show you how to set up a phase shift for a 2-leg interleaved configuration.
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
 ## Hardware setup and requirements
 
-The SPIN can use up to 5 different PWMs: PWMA, PWMC, PWMD, PWME and PWMF. This example will detail how to work with two of them in phase-shifted mode: PWMA and PWMC.
+The circuit diagram of the board is shown in the image below.
 
-![schema](Image/schema.png)
-*Figure 1*
+![circuit diagram](Image/circuit_diagram_provisory.png)
 
-You will need:
+The wiring diagram is shown in the figure below.
 
-- A SPIN
-- A USB-C cable to supply the SPIN
-- An oscilloscope to watch PWM waveform
+![wiring diagram](Image/wiring_diagram_provisory.png)
 
-We can watch PWMA1 on GPIO A8 and PWMC1 on GPIO B12.
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 SPIN
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
-## Software setup
+#### Main code structure
 
-We start by initializing PWMA and PWMC :
+The `main.cpp` structure is shown in the image below.
 
-```cpp
-    spin.pwm.setFrequency(200000); // Set frequency of pwm
+![Code structure](Image/main_structure_provisory.png)
 
-    /* PWM A initialization */
-    spin.pwm.initUnit(PWMA); // timer initialization
-    spin.pwm.startDualOutput(PWMA); // Start PWM
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
 
-    /* PWM C initialization */
-    spin.pwm.initUnit(PWMC); // timer initialization
-    spin.pwm.setPhaseShift(PWMC, 180); // Phase shift of 180° for 2 legs interleaved configuration
-    spin.pwm.startDualOutput(PWMC); // Start PWM
+The tasks are executed following the diagram below. 
+
+![Timing diagram](Image/timing_diagram_provisory.png)
+
+#### Control scheme
+
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
+
+```
+lib_deps=
+    control_lib = https://github.com/owntech-foundation/control_library.git
 ```
 
-The frequency for the PWM is initialized to 200 kHz but you are free to choose another value.
-
-PWMC is shifted by 180° from PWMA.
-
-The duty cycle is updated in the high-speed control task :
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
 
 ```cpp
-    spin.pwm.setDutyCycle(PWMA, duty_cycle);
-    spin.pwm.setDutyCycle(PWMC, duty_cycle);
+// Example controller init
+// pid.init(pid_params);
 ```
 
-The duty cycle is the same for both PWMA and PWMC.
+A control diagram placeholder is shown below.
 
-You can control the duty cycle from the serial monitor :
-- press `u` to increase the duty cycle
-- press `d` to decrease the duty cycle
-
-See [OwnPlot](https://github.com/owntech-foundation/OwnPlot) if you would like a better graphical interface for the serial monitor.
+![Control diagram](Image/control_diagram_provisory.png)
 
 ## Expected result
 
-![waveform](Image/waveform_phase_shift.png)
+This example should build and run on SPIN. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
 
-On the oscilloscope you should observe that PWMC1 is phase shifted by 180° from PWMA1 (which means they are complementary).
+![serial monitor button](Image/serial_monitor_button_provisory.png)
+
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
+
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
+
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
+
+An example runtime interaction is shown below.
+
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
+
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
+
+    A placeholder plot is shown below:
+
+    ![result_plot](Image/result_plot_provisory.png)

@@ -1,47 +1,83 @@
-# Using the spin with an incremental encoder
+# Incremental encoder
 
-An incremental encoder is a device that converts mechanical motion into digital signals. It typically consists of a rotating disk with evenly spaced slots and a sensor that detects these slots as the disk turns. The sensor generates electrical pulses corresponding to the motion, which can be used to track position, speed, or direction.
+Using a timer with a rotary incrmental encoder This example demonstrates the key setup, control flow, and expected outputs for this application.
 
-In this example we'll see how to use an incremental encoder with SPIN.
-
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
 ## Hardware setup and requirements
 
-![schema](Image/spin_wiring_diagram.drawio)
+The circuit diagram of the board is shown in the image below.
 
-You will need:
+![circuit diagram](Image/circuit_diagram_provisory.png)
 
-- A SPIN
-- A USB-C cable to supply the SPIN
-- A rotary incremental encoder
-- A 5V supply for your incremental encoder
+The wiring diagram is shown in the figure below.
 
-In this example you can use two different timers with your encoder. 
-Choose the appropriate timer according to the image above. 
+![wiring diagram](Image/wiring_diagram_provisory.png)
 
-## Software setup
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 SPIN
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
-We initialize the incremental encoder :
+#### Main code structure
 
-```cpp
-    spin.timer.startLogIncrementalEncoder(TIMER3);
-    spin.timer.startLogIncrementalEncoder(TIMER4);
+The `main.cpp` structure is shown in the image below.
+
+![Code structure](Image/main_structure_provisory.png)
+
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
+
+The tasks are executed following the diagram below. 
+
+![Timing diagram](Image/timing_diagram_provisory.png)
+
+#### Control scheme
+
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
+
+```
+lib_deps=
+    control_lib = https://github.com/owntech-foundation/control_library.git
 ```
 
-The value from the incremental encoder is updated in the background task (called every 100ms). 
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
 
 ```cpp
-    incremental_value_timer_3 = spin.timer.getIncrementalEncoderValue(TIMER3);
-    incremental_value_timer_4 = spin.timer.getIncrementalEncoderValue(TIMER4);
-    printk("TIM3: %u , TIM4: %d\n", incremental_value_timer_3, incremental_value_timer_4);
-
+// Example controller init
+// pid.init(pid_params);
 ```
 
+A control diagram placeholder is shown below.
 
-This value is displayed in the serial monitor.
+![Control diagram](Image/control_diagram_provisory.png)
 
 ## Expected result
 
-You should see the value in the serial monitor either increasing or decreasing depending on how you are turning the rotary incremental encoder (clockwise or not).
+This example should build and run on SPIN. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
 
-Every turn, your values should be reset to a reference value that will depend on your encoder. 
+![serial monitor button](Image/serial_monitor_button_provisory.png)
+
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
+
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
+
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
+
+An example runtime interaction is shown below.
+
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
+
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
+
+    A placeholder plot is shown below:
+
+    ![result_plot](Image/result_plot_provisory.png)

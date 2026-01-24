@@ -1,72 +1,83 @@
-# Current Control Experiment with Analog Communication - Code Example
+# DC client server
 
-## Overview
+implementation of DC client server in microgrid This example demonstrates the key setup, control flow, and expected outputs for this application.
 
-This code example demonstrates a current control experiment utilizing analog communication between a `MAIN` board and multiple `AUXILIARY` boards. The `MAIN` board operates in voltage control mode and sends current references to the `AUXILIARY` boards, which work in current control mode. The goal is to regulate and synchronize current injection into an electrical network.
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
-## Experimental Setup
+## Hardware setup and requirements
 
-- Two boards are used: a **`MAIN`** board and one or more **`AUXILIARY`** boards.
-- The `MAIN` board generates current references and communicates them to the `AUXILIARY` boards via analog communication. [Communication Current Mode](https://gitlab.laas.fr/afarahhass/Test-Controle/-/tree/main_Communication_CurrentMode?ref_type=heads)
-- Synchronization modules ensure coordination of PWM signals between `MAIN` and `AUXILIARY` boards.
-- Compensation control is utilized to equilibrate current between different legs of the system. [compensation control](https://gitlab.laas.fr/afarahhass/Test-Controle/-/tree/main_CurrentMode_EqulibrateCurrent)
+The circuit diagram of the board is shown in the image below.
 
+![circuit diagram](Image/circuit_diagram_provisory.png)
 
-| Connection diagram | Microgrid structure |
-| ------ | ------ |
-| ![schema_com](Image/Analogique.png) | ![schema_com](Image/Maitre.png)|
+The wiring diagram is shown in the figure below.
 
+![wiring diagram](Image/wiring_diagram_provisory.png)
 
-To run this example you would need:
-1. a voltage source fixed at ~30 V 
-2. 2 TWIST boards 
-3. 1 RJ45 cable to make the communication link between boards.
-4. A variable resistive load between approximately 6 and 12 ohms.
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 TWIST
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
-## Communication Modules
+#### Main code structure
 
-### 1. Analog Communication
+The `main.cpp` structure is shown in the image below.
 
-Analog communication facilitates the exchange of peak current references from the `MAIN` board to the `AUXILIARY` boards. This communication allows for current regulation and control within the system.
+![Code structure](Image/main_structure_provisory.png)
 
-### 2. Synchronization
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
 
-Synchronization modules ensure that PWM signals are aligned and coordinated between the `MAIN` and `AUXILIARY` boards. This synchronization is crucial for maintaining accurate current control and injection.
+The tasks are executed following the diagram below. 
 
-## Code Usage
+![Timing diagram](Image/timing_diagram_provisory.png)
 
-1. Upload `src/main.cpp` to the `MAIN` board and each `AUXILIARY` board.
-2. In the `main.cpp` file, navigate to line 114 to find the macro definition:
+#### Control scheme
 
-   ```cpp
-   #define MAIN
-   ```
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
 
-   Replace this macro with one of the following options based on the board you are flashing:
+```
+lib_deps=
+    control_lib = https://github.com/owntech-foundation/control_library.git
+```
 
-   For an `AUXILIARY` board:
-   ```cpp
-   #define AUXILIARY
-   ```
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
 
-## Example Workflow
+```cpp
+// Example controller init
+// pid.init(pid_params);
+```
 
-1. **`MAIN` Board Operation:**
-   - The `MAIN` board operates in voltage control mode.
-   - It generates current references within the 0-4000 range.
-   - Using analog communication, it sends these references to the `AUXILIARY` board(s).
+A control diagram placeholder is shown below.
 
-2. **`AUXILIARY` Board Operation:**
-   - Each `AUXILIARY` board operates in current control mode.
-   - It continuously monitors the analog communication from the `MAIN` board.
-   - The `AUXILIARY` board extracts the current reference and injects it into the electrical network.
-   - Compensation control ensures balanced current distribution among the system's legs.
+![Control diagram](Image/control_diagram_provisory.png)
 
-3. **Synchronization:**
-   - The synchronization modules guarantee that PWM signals are coordinated between the `MAIN` and `AUXILIARY` boards.
-   - This synchronization is vital for maintaining accurate and synchronized current injection.
+## Expected result
 
-## Conclusion
+This example should build and run on TWIST. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
 
-This code example showcases a current control experiment that employs analog communication between a `MAIN` board and multiple `AUXILIARY` boards. By following the provided instructions and flashing the appropriate code, you can simulate and observe the regulation and synchronization of current injection into an electrical network. The combination of voltage control, current control, analog communication, and synchronization modules results in an efficient and coordinated system for current regulation.
+![serial monitor button](Image/serial_monitor_button_provisory.png)
 
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
+
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
+
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
+
+An example runtime interaction is shown below.
+
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
+
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
+
+    A placeholder plot is shown below:
+
+    ![result_plot](Image/result_plot_provisory.png)

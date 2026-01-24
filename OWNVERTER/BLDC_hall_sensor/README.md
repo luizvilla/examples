@@ -1,66 +1,83 @@
-# BLDC control
+# BLDC motor with hall sensor
 
-In a BLDC (Brushless DC) motor, the rotor's position is typically divided into six sectors, each corresponding to a specific state of the Hall effect sensors.
-The control of the motor is achieved by appropriately energizing the stator windings in a sequence that creates a rotating magnetic field, which in turn causes the rotor to follow.
-The six sectors ensure that the motor phases are commutated correctly.
+Control a BLDC motor using hall effect sensor This example demonstrates the key setup, control flow, and expected outputs for this application.
 
-Here is a detailed explanation of the six sectors and the switching sequence for each sector. 
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
-### Six Sectors of BLDC Motor
+## Hardware setup and requirements
 
-The six sectors are determined based on the Hall effect sensor outputs, which change as the rotor rotates. The Hall sensors provide three signals (H1, H2, H3), which can be interpreted as a 3-bit binary code. Each unique combination of these signals corresponds to one of the six sectors.
+The circuit diagram of the board is shown in the image below.
 
-In code, this is done with:  
+![circuit diagram](Image/circuit_diagram_provisory.png)
 
-``` hall_state = hall1_value + 2 * hall2_value + 4 * hall3_value; ```  
+The wiring diagram is shown in the figure below.
 
-Note that this should be adapted depending on the way phases and hall effect sensors are connected to the inverter. It might be necessary to permute the hall
-values to run the motor correctly.  
+![wiring diagram](Image/wiring_diagram_provisory.png)
 
-### Controlling the motor
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 OWNVERTER
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
-In each sequence we supply only two windings using two legs of the OWNVERTER.
-Then, for example, if we supply phase A and B, the associated phase-to-phase voltage will
-be:
+#### Main code structure
 
-$U_{AB} = (2.\textsf{duty\\\_cycle} - 1). U_{dc}$
+The `main.cpp` structure is shown in the image below.
 
-In this example, duty_cycle can be increased or lowered by pressing `u` and `d` in the serial monitor. 
-It should directly affect motor speed.
+![Code structure](Image/main_structure_provisory.png)
 
-### Commutation Sequence
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
 
-The commutation sequence involves energizing pairs of motor phases (A, B, C) while leaving one phase floating. This creates a magnetic field that moves the rotor to the next position. The table below shows the state of the switches for each sector. 
+The tasks are executed following the diagram below. 
 
-- "1" indicates the switch is on.
-- "0" indicates the switch is off.
-- The phases are labeled as A, B, and C.
+![Timing diagram](Image/timing_diagram_provisory.png)
 
-#### Switch Notation
-- U: Upper switch
-- L: Lower switch
-- A, B, C: Phases
+#### Control scheme
 
-### Phase implementation 
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
 
-| Electrical Phase | PWM       | LEG       |
-|------------------|-----------|-----------|
-| Phase A          | PWMA      | LEG1       |
-| Phase B          | PWMC      | LEG2       |
-| Phase C          | PWME      | LEG3       |
+```
+lib_deps=
+    control_lib = https://github.com/owntech-foundation/control_library.git
+```
 
-### Commutation Table
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
 
-| Hall Sensors | Sector | Switch U_A | Switch L_A | Switch U_B | Switch L_B | Switch U_C | Switch L_C |
-|--------------|--------|------------|------------|------------|------------|------------|------------|
-| 011          | 0      | 0          | 0          | 1          | 0          | 0          | 1          |
-| 010          | 1      | 0          | 1          | 1          | 0          | 0          | 0          |
-| 110          | 2      | 0          | 1          | 0          | 0          | 1          | 0          |
-| 100          | 3      | 0          | 0          | 0          | 1          | 1          | 0          |
-| 101          | 4      | 1          | 0          | 0          | 1          | 0          | 0          |
-| 001          | 5      | 1          | 0          | 0          | 0          | 0          | 1          |
+```cpp
+// Example controller init
+// pid.init(pid_params);
+```
 
-![BLDC_Commutation_Table](Image/sectors_bldc.svg)*Commutation table*.
+A control diagram placeholder is shown below.
 
-This sequence ensures that the magnetic field rotates in such a way that the rotor is pulled along with it, allowing for smooth and efficient operation of the BLDC motor.
-Each transition between sectors corresponds to a change in the Hall sensor readings, which the control logic uses to determine the appropriate switches to energize.
+![Control diagram](Image/control_diagram_provisory.png)
+
+## Expected result
+
+This example should build and run on OWNVERTER. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
+
+![serial monitor button](Image/serial_monitor_button_provisory.png)
+
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
+
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
+
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
+
+An example runtime interaction is shown below.
+
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
+
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
+
+    A placeholder plot is shown below:
+
+    ![result_plot](Image/result_plot_provisory.png)

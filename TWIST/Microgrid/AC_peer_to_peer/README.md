@@ -1,89 +1,83 @@
-# Peer to peer AC control with an inverter and a synchronous rectifier
-## Overview
+# AC peer to peer
 
-Peer-to-peer communication in power electronics involves two converters, a DC/AC converter producing a certain power and informing an AC/DC converter that it can consume this reference power.
+implementation of AC peer to peer in microgrid This example demonstrates the key setup, control flow, and expected outputs for this application.
 
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
-<img src="Image/p2p_schematic.svg" alt="Schematic p2p" width="600" height="400">
+## Hardware setup and requirements
 
+The circuit diagram of the board is shown in the image below.
 
-`GENERATOR` DC/AC Converter (**single phase inverter**): This converter is responsible for converting direct current (DC) power into alternating current (AC) power. It may be connected to renewable energy sources (such as solar panels or wind turbines) or batteries, which produce DC power. The DC/AC converter's task is to generate AC power for use in the electrical network.
+![circuit diagram](Image/circuit_diagram_provisory.png)
 
-`CONSUMER` AC/DC Converter (**single phase synchronous rectifier**): This converter performs the opposite function. It converts AC power back into DC power. This conversion is necessary when the electrical network requires DC power for various applications, such as charging batteries or powering DC devices.
+The wiring diagram is shown in the figure below.
 
-In a peer-to-peer communication system, these converters communicate with each other to optimize power exchange. The DC/AC converter informs the AC/DC converter of the available power it can deliver. This information includes details like the power's magnitude and frequency.
+![wiring diagram](Image/wiring_diagram_provisory.png)
 
-An important aspect of this exchange is that the DC/AC converter must maintain an alternating current in phase opposition (180 degrees phase shift) with the input alternating voltage. This phase opposition ensures that power is effectively delivered to the load.
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 TWIST
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
-A **proportional resonant** is used to keep the input alternative current in phase opposition with the Vac, a PI is used to control the output voltage Vdc.
+#### Main code structure
 
-## Requirements and schematic
+The `main.cpp` structure is shown in the image below.
 
-![twist](Image/schema_P2P_TWIST.png)
+![Code structure](Image/main_structure_provisory.png)
 
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
 
-You will need:
+The tasks are executed following the diagram below. 
 
-- Two TWIST boards
-- A **50V** DC power supply (input voltage for the inverter)
-- A **6 V** DC power supply (external sensors/drivers supply for the synchronous rectifier)
-- A **115Ω** resistive load
-- An RJ45 cable
+![Timing diagram](Image/timing_diagram_provisory.png)
 
-It is important to check that the boards you are using have the correct voltage and current measures since they'll be used to compute the duty cycle.
+#### Control scheme
 
-## Instructions to flash the code, and view some results
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
 
-
-### To flash the code
-
-This example depends on two libraries:
-
-1. control_library
-2. ScopeMimicry
-
-To use them, you have to add the following lines in the `platformio.ini` file:
 ```
 lib_deps=
-    control_library = https://github.com/owntech-foundation/control_library.git
-    scope = https://github.com/owntech-foundation/scopemimicry.git 
+    control_lib = https://github.com/owntech-foundation/control_library.git
 ```
 
-In `src/main.cpp` at line 48 you have a macro that defines whether you are flashing the inverter or the synchronous rectifier.
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
 
-To flash the inverter, choose :
-
-```shell
-#define GENERATOR
+```cpp
+// Example controller init
+// pid.init(pid_params);
 ```
 
-To flash the synchronous rectifier, choose :
+A control diagram placeholder is shown below.
 
-```shell
-#define CONSUMER
-```
+![Control diagram](Image/control_diagram_provisory.png)
 
-Here P_ref = 20 W to have a 14 V output DC voltage. You can change this value on line 87 of the `src/main.cpp` file.
+## Expected result
 
-After that, connect to the inverter serial monitor and press `p` to start power flow. Press `i` to stop.
+This example should build and run on TWIST. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
 
-### To view some variables
-While running, press `t` to trigger the scope.
-After stopping, i.e. in IDLE mode, you can retrieve some data by pressing `r`. 
+![serial monitor button](Image/serial_monitor_button_provisory.png)
 
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
 
-## Expected results
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
 
-If everything goes well, you'll have 47 V delivered to the resistor.
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
 
-Here are some results for Vdc and Idc :
-![DC side result](Image/P2P-DCside_m.png)
+An example runtime interaction is shown below.
 
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
 
-And for Vac and Iac :
-![AC side result](Image/P2p-AcSide_m.png)
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
 
+    A placeholder plot is shown below:
 
-By using the Python script you can also watch MCU internal variables:
-
-![MCU values](Image/ADC_result_P2P.png)
+    ![result_plot](Image/result_plot_provisory.png)

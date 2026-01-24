@@ -1,40 +1,83 @@
-# Working with multiple PWM
+# Setting multiple PWM
 
-The SPIN has a total of 5 PWM channels with 2 complementary outputs each. In this example, we'll detail how to use each of them.
+Using multiple PWM with duty cycle This example demonstrates the key setup, control flow, and expected outputs for this application.
+
+!!! warning "Are you ready to start?"
+    Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
 ## Hardware setup and requirements
 
-![schema](Image/schema.png)
-*figure 1*
+The circuit diagram of the board is shown in the image below.
 
-You will need:
+![circuit diagram](Image/circuit_diagram_provisory.png)
 
-- A SPIN
-- A USB-C cable to supply the SPIN
-- An oscilloscope to watch PWM waveform
+The wiring diagram is shown in the figure below.
 
-We can watch:
+![wiring diagram](Image/wiring_diagram_provisory.png)
 
-- PWMA1 on GPIO A8
-- PWMC1 on GPIO B12
-- PWMD1 on GPIO B14
-- PWME1 on GPIO C8
-- PWMF1 on GPIO C6
+!!! warning Hardware pre-requisites 
+    You will need:
+    - 1 SPIN
+    - An appropriate power supply for your setup
+    - Any load/sensors required by the example
 
-## Software setup
+#### Main code structure
 
-This example is initializing every PWM, and making a phase shift of 72° (= 360/5) as if we were working in interleaved mode. See the [phase shift](../phase_shift/README.md) example for more details.
+The `main.cpp` structure is shown in the image below.
 
-The duty cycle is the same for both PWMA and PWMC.
+![Code structure](Image/main_structure_provisory.png)
 
-You can control the duty cycle from the serial monitor :
-- press `u` to increase the duty cycle
-- press `d` to decrease the duty cycle
+The code structure is typically organized as follows (task names can vary per example):
+- Initialization of board peripherals and application state
+- **Setup Routine** - sets up the hardware and software configuration
+- **Communication Task** - handles user I/O or external interfaces (if any)
+- **Application Task** - implements the main application logic and reporting
+- **Critical Task** - time-critical control or ISR-driven routines (if any)
 
-See [OwnPlot](https://github.com/owntech-foundation/OwnPlot) if you would like a better graphical interface for the serial monitor.
+The tasks are executed following the diagram below. 
+
+![Timing diagram](Image/timing_diagram_provisory.png)
+
+#### Control scheme
+
+If this example uses a control loop, ensure the control library is included in `platformio.ini`:
+
+```
+lib_deps=
+    control_lib = https://github.com/owntech-foundation/control_library.git
+```
+
+Initialize your controller (PID/PI/etc.) in code as needed, for example:
+
+```cpp
+// Example controller init
+// pid.init(pid_params);
+```
+
+A control diagram placeholder is shown below.
+
+![Control diagram](Image/control_diagram_provisory.png)
 
 ## Expected result
 
-![waveform](Image/waveform_multiple_pwm.png)
+This example should build and run on SPIN. Observe the behavior on the hardware and/or the serial monitor as appropriate for this example.
 
-You should observe 5 PWMs with a phase shift of 72° between them.
+![serial monitor button](Image/serial_monitor_button_provisory.png)
+
+When opening it for the first time, the serial monitor may provide initialization or status messages as shown below.  
+
+![serial monitor initialization](Image/serial_monitor_initialization_provisory.png)
+
+!!! tip Command keys
+    Use the serial help menu printed by the example (if any) to discover available commands.
+
+An example runtime interaction is shown below.
+
+![serial monitor working](Image/serial_monitor_operation_provisory.gif)
+
+!!! note The data that you see
+    If the example streams data over serial, refer to `main.cpp` for the output format and units.
+
+    A placeholder plot is shown below:
+
+    ![result_plot](Image/result_plot_provisory.png)
