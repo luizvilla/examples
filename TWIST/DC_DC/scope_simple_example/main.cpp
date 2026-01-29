@@ -36,6 +36,7 @@
 #include "pid.h"
 #include "arm_math_types.h"
 #include <ScopeMimicry.h>
+#include "ownscope.h"
 
 /*--------------SETUP FUNCTIONS DECLARATION------------------- */
 /* Setups the hardware and software of the system */
@@ -90,12 +91,7 @@ static float32_t Ts = control_task_period * 1e-6;
 static PidParams pid_params(Ts, kp, Ti, Td, N, lower_bound, upper_bound);
 static Pid pid;
 
-static const uint16_t NB_DATAS = 2048;
-static const float32_t minimal_step = 1.0F / (float32_t) NB_DATAS;
-static uint16_t number_of_cycle = 2;
-static ScopeMimicry scope(NB_DATAS, 6);
-static bool is_downloading;
-static bool trigger = false;
+static ownScope scope(6);
 
 /*--------------------------------------------------------------- */
 
@@ -107,29 +103,6 @@ enum serial_interface_menu_mode
 };
 
 uint8_t mode = IDLEMODE;
-
-/* Trigger function for scope manager */
-bool a_trigger() {
-    return trigger;
-}
-
-void dump_scope_datas(ScopeMimicry &scope)  {
-    uint8_t *buffer = scope.get_buffer();
-    /* We divide by 4 (4 bytes per float data) */
-    uint16_t buffer_size = scope.get_buffer_size() >> 2;
-    printk("begin record\n");
-    printk("#");
-    for (uint16_t k=0;k < scope.get_nb_channel(); k++) {
-        printk("%s,", scope.get_channel_name(k));
-    }
-    printk("\n");
-    printk("# %d\n", scope.get_final_idx());
-    for (uint16_t k=0;k < buffer_size; k++) {
-        printk("%08x\n", *((uint32_t *)buffer + k));
-        task.suspendBackgroundUs(100);
-    }
-    printk("end record\n");
-}
 
 /*--------------SETUP FUNCTIONS------------------------------- */
 
@@ -159,7 +132,7 @@ void setup_routine()
     scope.connectChannel(V2_low_value, "V2_low");
     scope.connectChannel(duty_cycle, "duty_cycle");
     scope.connectChannel(V_high, "V_high");
-    scope.set_trigger(&a_trigger);
+    scope.set_trigger(&ownScope::scopeTrigger);
     scope.set_delay(0.2F);
     scope.start();
 
@@ -212,7 +185,7 @@ void loop_communication_task()
         case 's':
             printk("step response\n");
             voltage_reference += step_size;
-            trigger = true;
+            scope.setTriggerState(true);
             break;
         case 'u':
             voltage_reference += 0.5;
@@ -227,8 +200,8 @@ void loop_communication_task()
             step_size -= 0.5;
             break;
         case 'r':
-            is_downloading = true;
-            trigger = false;
+            scope.setIsDownloading(true);
+            scope.setTriggerState(false);
             break;
         default:
             break;
@@ -244,10 +217,10 @@ void loop_application_task()
 {
     if (mode == IDLEMODE) {
 
-        if (is_downloading)
+        if (scope.getIsDownloading())
         {
-            dump_scope_datas(scope);
-            is_downloading = false;
+            scope.dumpScopeDatas();
+            scope.setIsDownloading(false);
         }
         spin.led.turnOff();
 
