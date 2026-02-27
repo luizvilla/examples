@@ -80,8 +80,9 @@ serial_interface_menu_mode mode = IDLEMODE;
 static uint32_t control_task_period = 100; // [us]
 static bool send_idle = false;
 
-static float voltage_ref = 32.0F;
+static float voltage_ref = 10.0F;
 static float voltage_meas = 0.0F;
+static float voltage_meas_follower = 0.0F;
 
 
 
@@ -127,7 +128,7 @@ void reception_function(void)
         // MASTER flow: store follower feedback when its reply is received.
         if (frame_rx.sender_id == ROLE_FOLLOWER)
         {
-            voltage_meas = frame_rx.voltage_meas;
+            voltage_meas_follower = frame_rx.voltage_meas;
         }
     }
 }
@@ -178,8 +179,8 @@ void loop_communication_task()
 
 void loop_background_task()
 {
-    printk("role=%u mode=%u vref=%0.2f vmeas=%0.2f rx=%u\n",
-           role_id, mode, (double)voltage_ref, (double)voltage_meas);
+    printk("role=%u mode=%u vref=%0.2f vmeas_follow=%0.2f \n",
+           role_id, mode, (double)voltage_ref, (double)voltage_meas_follower);
 
     if (mode == POWERMODE)
     {
