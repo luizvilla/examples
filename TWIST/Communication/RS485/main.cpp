@@ -134,6 +134,7 @@ void reception_function(void)
 
 void setup_routine()
 {
+    shield.power.initBuck(ALL);
     shield.sensors.enableDefaultTwistSensors();
 
     uint32_t background_task_number = task.createBackground(loop_background_task);
