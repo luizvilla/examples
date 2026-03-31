@@ -323,6 +323,23 @@
             "main.cpp",
             "README.md"
         ]
+    },
+    {
+        "name": "foc_speed_hall_sensor",
+        "title": "Motor control using FOC, hall sensors and the position API",
+        "description": "an example which show the use of a Field Oriented Control algorithm with discrete hall sensors and the position API",
+        "group": "Examples OWNVERTER",
+        "base": "OWNVERTER/FOC_speed_hall_sensor",
+        "files": [
+            "abz.overlay",
+            "app copy.overlay",
+            "app.ini",
+            "app.overlay",
+            "hall.overlay",
+            "main.cpp",
+            "README.md",
+            "sincos.overlay"
+        ]
     }
     ]
 }
