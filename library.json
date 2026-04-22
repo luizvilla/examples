@@ -352,6 +352,19 @@
         ]
     },
     {
+        "name": "ownverter_rotor_angle_visibility_encoder",
+        "title": "OwnVerter rotor angle visibility with incremental encoder",
+        "description": "Read ABZ encoder-based position feedback through the Position API before closing a motor control loop",
+        "group": "Examples OWNVERTER",
+        "base": "OWNVERTER/sensors/rotor_angle_visibility_encoder",
+        "files": [
+            "app.ini",
+            "app.overlay",
+            "main.cpp",
+            "README.md"
+        ]
+    },
+    {
         "name": "ownverter_open_loop_vq_spin_hall",
         "title": "OwnVerter open-loop Vq spin with Hall sensors",
         "description": "Spin the motor in open loop from a Park-frame Vq reference while observing Hall-based angle feedback",
@@ -395,7 +408,7 @@
         "title": "BLDC motor with hall sensor",
         "description": "Control a BLDC motor using hall effect sensor",
         "group": "Examples OWNVERTER",
-        "base": "OWNVERTER/BLDC_hall_sensor",
+        "base": "OWNVERTER/legacy/BLDC_hall_sensor",
         "files": [
             "main.cpp",
             "README.md"
@@ -406,7 +419,7 @@
         "title": "Motor control using FOC and hall sensors",
         "description": "an example which show the use of a Field Oriented Control algorithm with discrete hall sensors",
         "group": "Examples OWNVERTER",
-        "base": "OWNVERTER/FOC_hall_sensor",
+        "base": "OWNVERTER/legacy/FOC_hall_sensor",
         "files": [
             "main.cpp",
             "README.md"
@@ -417,7 +430,7 @@
         "title": "Motor control using FOC, hall sensors and the position API",
         "description": "an example which show the use of a Field Oriented Control algorithm with discrete hall sensors and the position API",
         "group": "Examples OWNVERTER",
-        "base": "OWNVERTER/FOC_speed_hall_sensor",
+        "base": "OWNVERTER/legacy/FOC_speed_hall_sensor",
         "files": [
             "abz.overlay",
             "app copy.overlay",
