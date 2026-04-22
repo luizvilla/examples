@@ -303,6 +303,94 @@
         ]
     },
     {
+        "name": "ownverter_power_open_loop_manual_duty",
+        "title": "OwnVerter open-loop manual duty",
+        "description": "First OwnVerter beginner example: power on and off in open loop with a manually adjusted duty cycle",
+        "group": "Examples OWNVERTER",
+        "base": "OWNVERTER/basic/power_open_loop_manual_duty",
+        "files": [
+            "app.ini",
+            "main.cpp",
+            "README.md"
+        ]
+    },
+    {
+        "name": "ownverter_measurements_enable",
+        "title": "OwnVerter measurements enable",
+        "description": "Second OwnVerter beginner example: enable default measurements while keeping the same open-loop PWM workflow",
+        "group": "Examples OWNVERTER",
+        "base": "OWNVERTER/basic/measurements_enable",
+        "files": [
+            "app.ini",
+            "main.cpp",
+            "README.md"
+        ]
+    },
+    {
+        "name": "ownverter_sine_modulation_ot_sin",
+        "title": "OwnVerter sine modulation with ot_sin",
+        "description": "Third OwnVerter beginner example: create a three-phase sinusoidal modulation using ot_sin",
+        "group": "Examples OWNVERTER",
+        "base": "OWNVERTER/basic/sine_modulation_ot_sin",
+        "files": [
+            "app.ini",
+            "main.cpp",
+            "README.md"
+        ]
+    },
+    {
+        "name": "ownverter_rotor_angle_visibility_hall",
+        "title": "OwnVerter rotor angle visibility with Hall sensors",
+        "description": "Read Hall-based position feedback through the Position API before closing a motor control loop",
+        "group": "Examples OWNVERTER",
+        "base": "OWNVERTER/sensors/rotor_angle_visibility_hall",
+        "files": [
+            "app.ini",
+            "app.overlay",
+            "main.cpp",
+            "README.md"
+        ]
+    },
+    {
+        "name": "ownverter_open_loop_vq_spin_hall",
+        "title": "OwnVerter open-loop Vq spin with Hall sensors",
+        "description": "Spin the motor in open loop from a Park-frame Vq reference while observing Hall-based angle feedback",
+        "group": "Examples OWNVERTER",
+        "base": "OWNVERTER/FOC/open_loop_vq_spin_hall",
+        "files": [
+            "app.ini",
+            "app.overlay",
+            "main.cpp",
+            "README.md"
+        ]
+    },
+    {
+        "name": "ownverter_iq_current_control_hall",
+        "title": "OwnVerter Iq current control with Hall sensors",
+        "description": "Close the q-axis current loop using current measurements and Hall-based electrical angle feedback",
+        "group": "Examples OWNVERTER",
+        "base": "OWNVERTER/FOC/iq_current_control_hall",
+        "files": [
+            "app.ini",
+            "app.overlay",
+            "main.cpp",
+            "README.md"
+        ]
+    },
+    {
+        "name": "ownverter_speed_control_hall",
+        "title": "OwnVerter speed control with Hall sensors",
+        "description": "Add an outer speed loop on top of the q-axis current loop using Hall-based position feedback",
+        "group": "Examples OWNVERTER",
+        "base": "OWNVERTER/FOC/speed_control_hall",
+        "files": [
+            "app.ini",
+            "app.overlay",
+            "main.cpp",
+            "README.md"
+        ]
+    },
+    {
         "name": "BLDC_hall_sensor",
         "title": "BLDC motor with hall sensor",
         "description": "Control a BLDC motor using hall effect sensor",

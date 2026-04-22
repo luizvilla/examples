@@ -40,3 +40,19 @@ Here you can find ready to be used example for [SPIN](https://github.com/owntech
 
 - TIMER
     - [Incremental encoder](SPIN/TIMER/incremental_encoder/README.md)
+
+# Examples for OWNVERTER
+
+- Beginner path
+    - [Open-loop manual duty](OWNVERTER/basic/power_open_loop_manual_duty/README.md)
+    - [Measurements enable](OWNVERTER/basic/measurements_enable/README.md)
+    - [Sine modulation with ot_sin](OWNVERTER/basic/sine_modulation_ot_sin/README.md)
+    - [Rotor angle visibility with Hall sensors](OWNVERTER/sensors/rotor_angle_visibility_hall/README.md)
+    - [Open-loop Vq spin with Hall sensors](OWNVERTER/FOC/open_loop_vq_spin_hall/README.md)
+    - [Iq current control with Hall sensors](OWNVERTER/FOC/iq_current_control_hall/README.md)
+    - [Speed control with Hall sensors](OWNVERTER/FOC/speed_control_hall/README.md)
+
+- Reference examples
+    - [BLDC hall sensor](OWNVERTER/BLDC_hall_sensor/README.md)
+    - [FOC hall sensor](OWNVERTER/FOC_hall_sensor/README.md)
+    - [FOC speed hall sensor](OWNVERTER/FOC_speed_hall_sensor/README.md)
