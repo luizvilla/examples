@@ -4,13 +4,13 @@
 	};
 };
 
-&default_motor {
-	pole-pairs = <4>;
-};
+default_motor: default-motor {
+		pole-pairs = <4>;
+	};
 
-&hall {
-	direction-sign = <1>;
-	electrical-offset = <0x00000000>;
-	hall-sector-table = <5 1 0 3 4 2>;
-	hall-interpolation = "LINEAR";
-};
+hall: hall {
+		direction-sign = <1>;
+		electrical-offset = <0x00000000>;
+		hall-sector-table = <5 1 0 3 4 2>;
+		hall-interpolation = "LINEAR";
+	};

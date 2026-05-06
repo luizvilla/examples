@@ -4,12 +4,12 @@
 	};
 };
 
-&default_motor {
-	pole-pairs = <4>;
-};
+default_motor: default-motor {
+		pole-pairs = <4>;
+	};
 
-&abz {
-	counts-per-revolution = <4096>;
-	direction-sign = <1>;
-	electrical-offset = <0x00000000>;
-};
+abz: abz {
+		counts-per-revolution = <4096>;
+		direction-sign = <1>;
+		electrical-offset = <0x00000000>;
+	};
