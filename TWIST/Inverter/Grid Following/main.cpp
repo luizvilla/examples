@@ -57,6 +57,25 @@ void loop_application_task();
 /* Code to be executed in real time in the critical task */
 void loop_critical_task();
 
+
+/*--------------USER ENUM DECLARATIONS-------------------- */
+
+enum ConverterState : uint8_t /* Holds the current state of the inverter */
+{
+    IDLEMODE = 0,   /* Idle mode: stops the converter power */
+    POWERMODE = 1,  /* Power mode: injects power into the grid */
+    ERRORMODE = 3,  /* Error mode: indicates an error condition */
+    STARTUPMODE = 4 /* Startup mode: initializes the converter */
+};
+
+/* Selects the input source for the PLL synchronization */
+enum FollowingInputMode : uint8_t
+{
+    LOCAL_SINE_INPUT = 1,   /* Local teaching sine wave as PLL input */
+    MEASURED_GRID_INPUT = 2 /* Measured grid voltage/current as PLL input */
+};
+
+
 /*--------------SUPPORT FUNCTIONS DECLARATION------------------- */
 /* Returns whether the scope capture should trigger */
 bool a_trigger();
@@ -90,20 +109,6 @@ void handle_following_desync();
 
 /*--------------USER VARIABLES DECLARATIONS------------------- */
 
-enum ConverterState : uint8_t /* Holds the current state of the inverter */
-{
-    IDLEMODE = 0,   /* Idle mode: stops the converter power */
-    POWERMODE = 1,  /* Power mode: injects power into the grid */
-    ERRORMODE = 3,  /* Error mode: indicates an error condition */
-    STARTUPMODE = 4 /* Startup mode: initializes the converter */
-};
-
-/* Selects the input source for the PLL synchronization */
-enum FollowingInputMode : uint8_t
-{
-    LOCAL_SINE_INPUT = 1,   /* Local teaching sine wave as PLL input */
-    MEASURED_GRID_INPUT = 2 /* Measured grid voltage/current as PLL input */
-};
 
 /* Control task period in microseconds */
 static constexpr uint32_t CONTROL_TASK_PERIOD_US = 100;
