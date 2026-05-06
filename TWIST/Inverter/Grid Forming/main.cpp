@@ -60,7 +60,7 @@ bool a_trigger();
 /* Clamps a floating-point value inside the requested range */
 float32_t saturate(float32_t value, float32_t min, float32_t max);
 /* Returns the sign of a value while ignoring small noise around zero */
-float32_t sign(float32_t value, float32_t tolerance = 1.0e-3F);
+float32_t sign(float32_t value, float32_t tolerance);
 /* Moves a value toward its reference with a fixed slew rate */
 float32_t rate_limiter(
     float32_t reference, float32_t value, float32_t rate);
