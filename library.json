@@ -157,6 +157,39 @@
             ]
         },
         {
+            "name": "Open-Loop Sine Inverter",
+            "title": "Open-Loop Sine Inverter",
+            "description": "Single-phase H-bridge driven with a local 50 Hz sine without any voltage or current feedback. Baseline for checking PWM generation and duty clamping before moving to closed-loop inverter examples.",
+            "group": "Examples TWIST - Inverter",
+            "base": "TWIST/Inverter/Open-Loop",
+            "files": [
+                "main.cpp",
+                "README.md"
+            ]
+        },
+        {
+            "name": "Grid-Forming Inverter",
+            "title": "Grid-Forming Inverter",
+            "description": "Single-phase voltage-control inverter using singlePhaseInverter in FORMING mode with a local teaching sine. Generates its own voltage reference without requiring external grid synchronization.",
+            "group": "Examples TWIST - Inverter",
+            "base": "TWIST/Inverter/Grid Forming",
+            "files": [
+                "main.cpp",
+                "README.md"
+            ]
+        },
+        {
+            "name": "Grid-Following Inverter",
+            "title": "Grid-Following Inverter",
+            "description": "Single-phase current-control inverter using singlePhaseInverter in FOLLOWING mode. Uses a PLL to synchronize with the grid or a local teaching sine before enabling regulated current injection.",
+            "group": "Examples TWIST - Inverter",
+            "base": "TWIST/Inverter/Grid Following",
+            "files": [
+                "main.cpp",
+                "README.md"
+            ]
+        },
+        {
             "name": "CAN Communication",
             "title": "CAN Communication",
             "description": "This example deploys CAN communication of the Twist board",
