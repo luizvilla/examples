@@ -204,6 +204,18 @@
         ]
     },
     {
+        "name": "rs485_communication",
+        "title": "RS485 Communication",
+        "description": "Minimal RS485 master/follower exchange between two TWIST boards",
+        "group": "Examples TWIST",
+        "base": "TWIST/Communication/RS485",
+        "files": [
+            "main.cpp",
+            "app.conf",
+            "README.md"
+        ]
+    },
+    {
         "name": "blinky",
         "title": "Blinky LED",
         "description": "Toggling LED",
