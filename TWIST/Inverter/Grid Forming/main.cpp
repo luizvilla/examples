@@ -59,8 +59,6 @@ void loop_critical_task();
 bool a_trigger();
 /* Clamps a floating-point value inside the requested range */
 float32_t saturate(float32_t value, float32_t min, float32_t max);
-/* Returns the sign of a value while ignoring small noise around zero */
-float32_t sign(float32_t value, float32_t tolerance);
 /* Moves a value toward its reference with a fixed slew rate */
 float32_t rate_limiter(
     float32_t reference, float32_t value, float32_t rate);
@@ -108,7 +106,9 @@ static constexpr float32_t TS = CONTROL_TASK_PERIOD_US * 1.0e-6F;
 /* Fallback DC bus voltage in volts before sensing is valid */
 static constexpr float32_t DC_BUS_FALLBACK = 20.0F;
 /* DC bus voltage threshold required to leave idle mode */
-static constexpr float32_t UDC_STARTUP = 0.0F;
+static constexpr float32_t UDC_STARTUP = 20.0F;
+/* Neutral duty-cycle target used while precharging the H-bridge */
+static constexpr float32_t STARTUP_DUTY_TARGET = 0.5F;
 /* Grid frequency in hertz */
 static constexpr float32_t F0 = 50.0F;
 /* Grid pulsation in radians per second */
@@ -156,13 +156,9 @@ static float32_t Igrid_meas;
 static float32_t meas_data;
 
 /* [V] Amplitude of the local teaching sine wave */
-static float32_t local_voltage_amplitude = 20.0F;
-/* [rad] Phase angle of the local teaching sine wave */
-static float32_t teaching_theta;
+static float32_t local_voltage_amplitude = 12.0F;
 /* [rad] Phase angle estimated by the inverter controller */
 static float32_t inverter_theta;
-/* [No unit] Instantaneous value of the local teaching sine wave */
-static float32_t sine;
 /* [V] Instantaneous local grid voltage from the teaching sine */
 static float32_t local_vgrid;
 /* [A] Instantaneous local grid current from the teaching sine */
@@ -174,6 +170,8 @@ static dqo_t Vdq;
 static dqo_t Vdq_output;
 /* [V] DQ-axis voltage reference for the forming controller */
 static dqo_t Vdq_ref;
+/* [V] maximum DQ-axis voltage reference for the forming controller */
+static dqo_t Vdq_ref_max = {30.0F, 30.0F, 0.0F};
 /* [A] DQ-axis current in the synchronous reference frame */
 static dqo_t Idq;
 /* [A] DQ-axis current reference delta for control adjustments */
@@ -187,6 +185,8 @@ static float32_t duty_cycle_1 = 0.5F;
 static float32_t duty_cycle_2 = 0.5F;
 /* [rad/s] Estimated grid frequency from the inverter controller */
 static float32_t omega = W0;
+/* [deg] Current phase shift applied to leg 2 */
+static float32_t phase_shift_deg = 0.0F;
 /* [No unit] Scope variable for the current operating mode */
 static float32_t state_mode_scope;
 /* Counter for the number of critical task iterations */
@@ -225,26 +225,20 @@ float32_t saturate(float32_t value, float32_t min, float32_t max)
 }
 
 /**
- * @brief Returns the sign of a value while ignoring small noise around zero.
- */
-float32_t sign(float32_t value, float32_t tolerance = 1.0e-3F)
-{
-    if (value > tolerance) {
-        return 1.0F;
-    }
-    if (value < -tolerance) {
-        return -1.0F;
-    }
-    return 0.0F;
-}
-
-/**
  * @brief Moves a value toward its reference with a fixed slew rate.
  */
 float32_t rate_limiter(float32_t reference, float32_t value, float32_t rate)
 {
-    value += TS * rate * sign(reference - value);
-    return value;
+    const float32_t step = TS * rate;
+    const float32_t error = reference - value;
+
+    if (error > step) {
+        return value + step;
+    }
+    if (error < -step) {
+        return value - step;
+    }
+    return reference;
 }
 
 /**
@@ -311,13 +305,11 @@ void apply_complementary_duty(float32_t duty)
 }
 
 /**
- * @brief Advances the local teaching oscillator and derives voltage/current inputs.
+ * @brief Derives voltage/current inputs aligned with the inverter's own phase angle.
  */
 void update_teaching_sine()
 {
-    teaching_theta = ot_modulo_2pi(teaching_theta + W0 * TS);
-    sine = ot_sin(teaching_theta);
-    local_vgrid = local_voltage_amplitude * sine;
+    local_vgrid = local_voltage_amplitude * ot_sin(inverter_theta);
     local_igrid = local_vgrid / LOAD_RESISTANCE;
 }
 
@@ -332,6 +324,7 @@ void refresh_inverter_data()
     Idq_ref_delta = inverter.getIdqRefDelta();
     inverter_theta = inverter.getTheta();
     omega = inverter.getw();
+    phase_shift_deg = inverter.getPhaseShiftDeg();
 }
 
 /**
@@ -353,7 +346,7 @@ void dump_scope_datas(ScopeMimicry &scope_to_dump)
  */
 void adjust_voltage_reference(float32_t step)
 {
-    Vdq_ref.d = saturate(Vdq_ref.d + step, 0.0F, 30.0F);
+    Vdq_ref.d = saturate(Vdq_ref.d + step, 0.0F, Vdq_ref_max.d);
     local_voltage_amplitude = Vdq_ref.d;
 }
 
@@ -378,6 +371,7 @@ void setup_scope()
     scope.connectChannel(Idq.d, "Id_in");
     scope.connectChannel(Vdq_output.d, "Vd_out");
     scope.connectChannel(omega, "omega");
+    scope.connectChannel(phase_shift_deg, "phase_shift");
     scope.connectChannel(state_mode_scope, "state");
     scope.set_delay(0.5F);
     scope.set_trigger(a_trigger);
@@ -405,6 +399,7 @@ void read_measurements()
     if (meas_data != NO_VALUE) V_high = meas_data;
 
     V_high_filt = vHighFilter.calculateWithReturn(V_high);
+
     Vgrid_meas = V1_low_value - V2_low_value;
     Igrid_meas = I1_low_value;
 }
@@ -429,12 +424,12 @@ bool overcurrent_detected()
  */
 void setup_routine()
 {
-    spin.pwm.initFixedFrequency(50000);
-    shield.power.setDeadTime(LEG1, 20, 20);
-    shield.power.setDeadTime(LEG2, 20, 20);
+    spin.pwm.initFixedFrequency(200000);
+    shield.power.setDeadTime(LEG1, 100, 100);
+    shield.power.setDeadTime(LEG2, 100, 100);
     shield.sensors.enableDefaultTwistSensors();
-    shield.power.connectCapacitor(LEG1);
-    shield.power.connectCapacitor(LEG2);
+    shield.power.disconnectCapacitor(LEG1);
+    shield.power.disconnectCapacitor(LEG2);
     shield.power.initBuck(LEG1);
     shield.power.initBuck(LEG2);
 
@@ -466,6 +461,7 @@ void loop_communication_task()
             printk("|     p : power                          |\n");
             printk("|     u/j : Vd reference +/- 1 V         |\n");
             printk("|     d/c : Vd reference +/- 5 V         |\n");
+            printk("|     f/g : leg 2 phase shift +/- 1 deg  |\n");
             printk("|     r : retrieve scope data            |\n");
             printk("|     t : trigger scope data             |\n");
             printk("|________________________________________|\n\n");
@@ -490,6 +486,12 @@ void loop_communication_task()
             break;
         case 'c':
             adjust_voltage_reference(-5.0F);
+            break;
+        case 'f':
+            inverter.stepPhaseShiftUp();
+            break;
+        case 'g':
+            inverter.stepPhaseShiftDown();
             break;
         case 'r':
             is_downloading = true;
@@ -517,8 +519,9 @@ void loop_application_task()
         spin.led.turnOn();
         break;
     case STARTUPMODE:
-        if (delta_duty_cycle >= 0.5F) {
+        if (delta_duty_cycle >= STARTUP_DUTY_TARGET) {
             mode = POWERMODE;
+            printk("Entered POWERMODE\n");
         }
         break;
     case POWERMODE:
@@ -536,13 +539,14 @@ void loop_application_task()
 
     if (mode_asked == IDLEMODE) {
         mode = IDLEMODE;
+        delta_duty_cycle = 0.0F; /* Reset delta duty cycle */
     }
 
     if (is_downloading) {
         dump_scope_datas(scope);
         is_downloading = false;
     } else {
-        printk("state %d:Vdc %.2f:Vlocal %.2f:Vdref %.2f:Vd %.2f:Id %.2f:d1 %.3f:d2 %.3f\n",
+        printk("state %d:Vdc %.2f:Vlocal %.2f:Vdref %.2f:Vd %.2f:Id %.2f:d1 %.3f:d2 %.3f: delta_duty_cycle %.6f\n",
                mode,
                static_cast<double>(V_high_filt),
                static_cast<double>(local_vgrid),
@@ -550,7 +554,8 @@ void loop_application_task()
                static_cast<double>(Vdq.d),
                static_cast<double>(Idq.d),
                static_cast<double>(duty_cycle_1),
-               static_cast<double>(duty_cycle_2));
+               static_cast<double>(duty_cycle_2),
+               static_cast<double>(delta_duty_cycle));
     }
 
     task.suspendBackgroundMs(100);
@@ -572,19 +577,23 @@ void loop_critical_task()
     if (mode == IDLEMODE || mode == ERRORMODE) {
         stop_pwm_outputs();
         inverter.setPowerOn(false);
-        spin.led.turnOff();
     } else if (mode == STARTUPMODE) {
-        delta_duty_cycle = rate_limiter(0.5F, delta_duty_cycle, 50.0F);
-        if (delta_duty_cycle > 0.5F) {
-            delta_duty_cycle = 0.5F;
-        }
+        delta_duty_cycle = rate_limiter(
+            STARTUP_DUTY_TARGET, delta_duty_cycle, 50.0F);
+
         apply_common_duty(delta_duty_cycle);
+        
         start_pwm_outputs();
+
     } else if (mode == POWERMODE) {
+        inverter.setPowerOn(true);
         inverter.setVBus(control_bus_voltage());
         inverter.setVdqRef(Vdq_ref);
-        delta_duty_cycle = inverter.calculateDuty(local_vgrid, local_igrid);
-        apply_complementary_duty(delta_duty_cycle);
+        delta_duty_cycle = inverter.calculateDuty(Vgrid_meas, Igrid_meas);
+        duty_cycle_1 = clamp_duty(delta_duty_cycle);
+        duty_cycle_2 = clamp_duty(inverter.getDutyLeg2());
+        shield.power.setDutyCycle(LEG1, duty_cycle_1);
+        shield.power.setDutyCycle(LEG2, duty_cycle_2);
         start_pwm_outputs();
     }
 
