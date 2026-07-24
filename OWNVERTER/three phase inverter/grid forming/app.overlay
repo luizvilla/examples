@@ -1,0 +1,4 @@
+&powershield{
+    default-frequency = <200000>;
+    min-frequency = <200000>;
+};

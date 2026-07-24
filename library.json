@@ -337,6 +337,68 @@
             ]
         },
         {
+            "name": "OwnVerter Open-Loop Manual Duty",
+            "title": "OwnVerter Open-Loop Manual Duty",
+            "description": "Beginner OwnVerter example: initializes the power stage, enters and leaves power mode from the serial console, and changes a PWM duty cycle manually.",
+            "group": "Examples OWNVERTER - Basic",
+            "base": "OWNVERTER/basic/power_open_loop_manual_duty",
+            "files": [
+                "main.cpp",
+                "app.ini",
+                "README.md"
+            ]
+        },
+        {
+            "name": "OwnVerter Measurements Enable",
+            "title": "OwnVerter Measurements Enable",
+            "description": "Beginner OwnVerter example that keeps the manual open-loop PWM interface and adds the default OwnVerter current and voltage measurements.",
+            "group": "Examples OWNVERTER - Basic",
+            "base": "OWNVERTER/basic/measurements_enable",
+            "files": [
+                "main.cpp",
+                "app.ini",
+                "README.md"
+            ]
+        },
+        {
+            "name": "OwnVerter Sine Modulation With ot_sin",
+            "title": "OwnVerter Sine Modulation With ot_sin",
+            "description": "Beginner OwnVerter example that replaces the fixed duty cycle with a sinusoidal modulation law built with ot_sin, converting a modulation index into three-phase duty cycles.",
+            "group": "Examples OWNVERTER - Basic",
+            "base": "OWNVERTER/basic/sine_modulation_ot_sin",
+            "files": [
+                "main.cpp",
+                "app.ini",
+                "README.md"
+            ]
+        },
+        {
+            "name": "Three-Phase Grid-Following Inverter",
+            "title": "Three-Phase Grid-Following Inverter",
+            "description": "Three-phase grid-following inverter control strategy using a PLL to synchronize with the grid and regulate current injection.",
+            "group": "Examples OWNVERTER - Three-Phase Inverter",
+            "base": "OWNVERTER/three phase inverter/grid following",
+            "files": [
+                "main.cpp",
+                "app.ini",
+                "app.overlay",
+                "README.md"
+            ]
+        },
+        {
+            "name": "Three-Phase Grid-Forming Inverter",
+            "title": "Three-Phase Grid-Forming Inverter",
+            "description": "Three-phase grid-forming inverter control strategy that generates its own voltage reference and regulates the output voltage without requiring external grid synchronization.",
+            "group": "Examples OWNVERTER - Three-Phase Inverter",
+            "base": "OWNVERTER/three phase inverter/grid forming",
+            "files": [
+                "main.cpp",
+                "app.ini",
+                "app.overlay",
+                "README.md"
+            ]
+        },
+        {
             "name": "HRTIM triggered ADC",
             "title": "HRTIM triggered ADC",
             "description": "setting the adc to be trigerred by the hrtim",
