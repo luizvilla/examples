@@ -51,7 +51,7 @@
             "title": "Open Loop PWM",
             "description": "Simple open loop PWM example",
             "group": "Examples TWIST - Basic",
-            "base": "TWIST/Basic/Open-Loop_PWM",
+            "base": "TWIST/Basic/Open-Loop PWM",
             "files": [
                 "main.cpp",
                 "README.md"
@@ -65,6 +65,7 @@
             "base": "TWIST/DC_DC/buck_voltage_mode",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -76,6 +77,7 @@
             "base": "TWIST/DC_DC/boost_voltage_mode",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -87,6 +89,7 @@
             "base": "TWIST/DC_DC/buck_current_mode",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -98,6 +101,7 @@
             "base": "TWIST/DC_DC/interleaved",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -109,6 +113,7 @@
             "base": "TWIST/DC_DC/independent",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -120,6 +125,7 @@
             "base": "TWIST/DC_DC/scope_simple_example",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -131,6 +137,7 @@
             "base": "TWIST/DC_DC/current_ripple_measurement",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -142,6 +149,10 @@
             "base": "TWIST/DC_AC/grid_following",
             "files": [
                 "main.cpp",
+                "app.ini",
+                "filter_recorded_datas.py",
+                "plot_data.py",
+                "script.py",
                 "README.md"
             ]
         },
@@ -153,6 +164,7 @@
             "base": "TWIST/DC_AC/grid_forming",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -165,6 +177,7 @@
             "files": [
                 "main.cpp",
                 "app.conf",
+                "app.ini",
                 "README.md",
                 "user_data_objects.h"
             ]
@@ -178,6 +191,20 @@
             "files": [
                 "main.cpp",
                 "comm_script.py",
+                "app.ini",
+                "README.md"
+            ]
+        },
+        {
+            "name": "RS485 Communication",
+            "title": "RS485 Communication",
+            "description": "This example deploys a simple RS485 communication interface.",
+            "group": "Examples TWIST - COMM",
+            "base": "TWIST/Communication/RS485",
+            "files": [
+                "main.cpp",
+                "app.conf",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -189,6 +216,8 @@
             "base": "TWIST/Microgrid/AC_client_server",
             "files": [
                 "main.cpp",
+                "app.conf",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -200,6 +229,7 @@
             "base": "TWIST/Microgrid/AC_peer_to_peer",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -211,6 +241,7 @@
             "base": "TWIST/Microgrid/DC_client_server",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -222,6 +253,7 @@
             "base": "TWIST/Microgrid/DC_droop",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -233,6 +265,7 @@
             "base": "OWNVERTER/BLDC_hall_sensor",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -244,6 +277,7 @@
             "base": "OWNVERTER/FOC_hall_sensor",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -255,6 +289,7 @@
             "base": "SPIN/ADC/adc_hrtim_trigger",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -266,6 +301,7 @@
             "base": "SPIN/ADC/adc_software_trigger",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -277,6 +313,7 @@
             "base": "SPIN/DAC/signal_generation",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -288,6 +325,7 @@
             "base": "SPIN/TIMER/incremental_encoder",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -299,6 +337,7 @@
             "base": "SPIN/LED/blinky",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -310,6 +349,7 @@
             "base": "SPIN/PWM/burst_mode",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -321,6 +361,7 @@
             "base": "SPIN/PWM/duty_cycle_setting",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -332,6 +373,7 @@
             "base": "SPIN/PWM/multiple_pwm",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -343,6 +385,7 @@
             "base": "SPIN/PWM/phase_shift",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         }
