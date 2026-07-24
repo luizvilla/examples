@@ -176,6 +176,7 @@
             "base": "TWIST/Inverter/Open-Loop",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
@@ -187,6 +188,8 @@
             "base": "TWIST/Inverter/Grid Forming",
             "files": [
                 "main.cpp",
+                "app.ini",
+                "fft_analysis.py",
                 "README.md"
             ]
         },
@@ -198,6 +201,7 @@
             "base": "TWIST/Inverter/Grid Following",
             "files": [
                 "main.cpp",
+                "app.ini",
                 "README.md"
             ]
         },
