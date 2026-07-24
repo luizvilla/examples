@@ -363,7 +363,7 @@
         {
             "name": "OwnVerter Measurements Enable",
             "title": "OwnVerter Measurements Enable",
-            "description": "Beginner OwnVerter example that keeps the manual open-loop PWM interface and adds the default OwnVerter current and voltage measurements.",
+            "description": "Initializes the OwnVerter power shield in Buck mode and enables the default measurements without ever starting the PWM, so there is no power flow. Reads and prints the three leg currents/voltages, the high side current/voltage, and the three leg temperatures over serial.",
             "group": "Examples OWNVERTER - Basic",
             "base": "OWNVERTER/basic/measurements_enable",
             "files": [

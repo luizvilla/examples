@@ -4,68 +4,42 @@
  * SPDX-License-Identifier: LGPL-2.1
  */
 
-#include "ScopeMimicry.h"
+/**
+ * @brief  This example initializes the OwnVerter power shield in Buck mode
+ *         and enables the default measurements, without ever starting the
+ *         PWM or driving a duty cycle. There is no power flow: it only
+ *         reads back and logs the leg currents/voltages, the high side
+ *         current/voltage, and the three leg temperatures.
+ *
+ * @author Luiz Villa <luiz.villa@laas.fr>
+ */
+
 #include "ShieldAPI.h"
 #include "TaskAPI.h"
-#include "zephyr/console/console.h"
 
 void setup_routine();
-void loop_background_task();
-void application_task();
+void loop_application_task();
 void loop_critical_task();
 
-static float32_t duty_cycle = 0.50F;
 static float32_t V1_low_value;
 static float32_t V2_low_value;
+static float32_t V3_low_value;
 static float32_t V_high;
 static float32_t I1_low_value;
 static float32_t I2_low_value;
+static float32_t I3_low_value;
 static float32_t I_high;
-static float32_t mode_f;
 static float32_t meas_data;
-static bool pwm_enable;
-static uint8_t received_serial_char;
 
-const uint16_t SCOPE_SIZE = 256;
-ScopeMimicry scope(SCOPE_SIZE, 6);
-uint16_t k_app_idx;
-static bool is_downloading;
-static bool memory_print;
-
-enum serial_interface_menu_mode
-{
-	IDLEMODE = 0,
-	POWERMODE = 1,
-};
-
-static uint8_t mode = IDLEMODE;
-
-static float32_t clamp(float32_t value, float32_t min_value, float32_t max_value)
-{
-	if (value < min_value) {
-		return min_value;
-	}
-	if (value > max_value) {
-		return max_value;
-	}
-	return value;
-}
-
-bool mytrigger()
-{
-	return (mode == POWERMODE);
-}
-
-void dump_scope_datas(ScopeMimicry &scope_buffer)
-{
-	printk("begin record\n");
-	scope_buffer.reset_dump();
-	while (scope_buffer.get_dump_state() != finished) {
-		printk("%s", scope_buffer.dump_datas());
-		task.suspendBackgroundUs(200);
-	}
-	printk("end record\n");
-}
+/* OwnVerter multiplexes its three leg temperatures on a single ADC
+ * channel: only one of TEMP_1/TEMP_2/TEMP_3 can be selected at a time,
+ * so it takes several background task iterations to cycle through all
+ * three and let the analog mux settle between switches. */
+static float32_t T1_value;
+static float32_t T2_value;
+static float32_t T3_value;
+static uint32_t temp_counter;
+static const uint32_t TEMP_SWITCH_PERIOD = 5;
 
 void retrieve_measurements()
 {
@@ -77,6 +51,11 @@ void retrieve_measurements()
 	meas_data = shield.sensors.getLatestValue(I2_LOW);
 	if (meas_data != NO_VALUE) {
 		I2_low_value = meas_data;
+	}
+
+	meas_data = shield.sensors.getLatestValue(I3_LOW);
+	if (meas_data != NO_VALUE) {
+		I3_low_value = meas_data;
 	}
 
 	meas_data = shield.sensors.getLatestValue(I_HIGH);
@@ -94,25 +73,40 @@ void retrieve_measurements()
 		V2_low_value = meas_data;
 	}
 
+	meas_data = shield.sensors.getLatestValue(V3_LOW);
+	if (meas_data != NO_VALUE) {
+		V3_low_value = meas_data;
+	}
+
 	meas_data = shield.sensors.getLatestValue(V_HIGH);
 	if (meas_data != NO_VALUE) {
 		V_high = meas_data;
 	}
 }
 
-void stop_pwm_if_needed()
+/* Reads back the temperature selected on a previous call, then moves the
+ * mux on to the next one. Called once per background task iteration. */
+void retrieve_temperatures()
 {
-	if (pwm_enable) {
-		shield.power.stop(ALL);
-		pwm_enable = false;
-	}
-}
+	meas_data = shield.sensors.getLatestValue(TEMP_SENSOR);
 
-void start_pwm_if_needed()
-{
-	if (!pwm_enable) {
-		shield.power.start(ALL);
-		pwm_enable = true;
+	temp_counter++;
+	if (temp_counter == TEMP_SWITCH_PERIOD) {
+		if (meas_data != NO_VALUE) {
+			T3_value = meas_data;
+		}
+		shield.sensors.setOwnverterTempMeas(TEMP_1);
+	} else if (temp_counter == 2 * TEMP_SWITCH_PERIOD) {
+		if (meas_data != NO_VALUE) {
+			T1_value = meas_data;
+		}
+		shield.sensors.setOwnverterTempMeas(TEMP_2);
+	} else if (temp_counter == 3 * TEMP_SWITCH_PERIOD) {
+		if (meas_data != NO_VALUE) {
+			T2_value = meas_data;
+		}
+		shield.sensors.setOwnverterTempMeas(TEMP_3);
+		temp_counter = 0;
 	}
 }
 
@@ -121,95 +115,29 @@ void setup_routine()
 	shield.power.initBuck(ALL);
 	shield.sensors.enableDefaultOwnverterSensors();
 
-	scope.connectChannel(duty_cycle, "duty_cycle");
-	scope.connectChannel(V_high, "V_high");
-	scope.connectChannel(I_high, "I_high");
-	scope.connectChannel(V1_low_value, "V1_low");
-	scope.connectChannel(I1_low_value, "I1_low");
-	scope.connectChannel(mode_f, "mode");
-	scope.set_trigger(&mytrigger);
-	scope.set_delay(0.0F);
-	scope.start();
-
-	uint32_t background_task_number = task.createBackground(loop_background_task);
-	uint32_t application_task_number = task.createBackground(application_task);
+	uint32_t application_task_number = task.createBackground(loop_application_task);
 	task.createCritical(loop_critical_task, 100);
 
-	task.startBackground(background_task_number);
 	task.startBackground(application_task_number);
 	task.startCritical();
 }
 
-void loop_background_task()
+void loop_application_task()
 {
-	received_serial_char = console_getchar();
-	switch (received_serial_char) {
-	case 'h':
-		printk(" ________________________________________ \n"
-			   "|     ------- MENU ---------             |\n"
-			   "|     press i : idle mode                |\n"
-			   "|     press p : power mode               |\n"
-			   "|     press u : duty cycle UP            |\n"
-			   "|     press d : duty cycle DOWN          |\n"
-			   "|     press r : dump scope capture       |\n"
-			   "|     press q : restart scope capture    |\n"
-			   "|     press m : replay scope memory      |\n"
-			   "|________________________________________|\n\n");
-		break;
-	case 'i':
-		mode = IDLEMODE;
-		break;
-	case 'p':
-		mode = POWERMODE;
-		scope.start();
-		break;
-	case 'u':
-		duty_cycle = clamp(duty_cycle + 0.01F, 0.05F, 0.95F);
-		break;
-	case 'd':
-		duty_cycle = clamp(duty_cycle - 0.01F, 0.05F, 0.95F);
-		break;
-	case 'r':
-		is_downloading = true;
-		break;
-	case 'q':
-		scope.start();
-		break;
-	case 'm':
-		memory_print = !memory_print;
-		break;
-	default:
-		break;
-	}
-}
+	retrieve_temperatures();
 
-void application_task()
-{
-	if (!memory_print) {
-		printk("mode:%u duty:%.3f Vhigh:%.2f Ihigh:%.2f V1:%.2f V2:%.2f I1:%.2f I2:%.2f\n",
-		       mode,
-		       (double)duty_cycle,
-		       (double)V_high,
-		       (double)I_high,
-		       (double)V1_low_value,
-		       (double)V2_low_value,
-		       (double)I1_low_value,
-		       (double)I2_low_value);
-	} else {
-		k_app_idx = (k_app_idx + 1) % SCOPE_SIZE;
-		printk("%.3f:%.2f:%.2f:%.2f:%.2f:%.1f\n",
-		       (double)scope.get_channel_value(k_app_idx, 0),
-		       (double)scope.get_channel_value(k_app_idx, 1),
-		       (double)scope.get_channel_value(k_app_idx, 2),
-		       (double)scope.get_channel_value(k_app_idx, 3),
-		       (double)scope.get_channel_value(k_app_idx, 4),
-		       (double)scope.get_channel_value(k_app_idx, 5));
-	}
-
-	if (is_downloading) {
-		dump_scope_datas(scope);
-		is_downloading = false;
-	}
+	printk("Vhigh:%.2f Ihigh:%.2f V1:%.2f V2:%.2f V3:%.2f I1:%.2f I2:%.2f I3:%.2f T1:%.2f T2:%.2f T3:%.2f\n",
+	       (double)V_high,
+	       (double)I_high,
+	       (double)V1_low_value,
+	       (double)V2_low_value,
+	       (double)V3_low_value,
+	       (double)I1_low_value,
+	       (double)I2_low_value,
+	       (double)I3_low_value,
+	       (double)T1_value,
+	       (double)T2_value,
+	       (double)T3_value);
 
 	task.suspendBackgroundMs(200);
 }
@@ -217,16 +145,6 @@ void application_task()
 void loop_critical_task()
 {
 	retrieve_measurements();
-
-	if (mode == POWERMODE) {
-		shield.power.setDutyCycle(ALL, duty_cycle);
-		start_pwm_if_needed();
-	} else {
-		stop_pwm_if_needed();
-	}
-
-	mode_f = (float32_t)mode;
-	scope.acquire();
 }
 
 int main(void)
