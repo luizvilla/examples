@@ -39,7 +39,7 @@ static float32_t T1_value;
 static float32_t T2_value;
 static float32_t T3_value;
 static uint32_t temp_counter;
-static const uint32_t TEMP_SWITCH_PERIOD = 5;
+static const uint32_t TEMP_SWITCH_PERIOD = 10;
 
 void retrieve_measurements()
 {
@@ -139,7 +139,7 @@ void loop_application_task()
 	printk("%.2f:", (double)T3_value);
 	printk("\n");
 
-	task.suspendBackgroundMs(200);
+	task.suspendBackgroundMs(100);
 }
 
 void loop_critical_task()

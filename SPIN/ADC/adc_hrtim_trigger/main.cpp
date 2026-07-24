@@ -37,7 +37,7 @@ void setup_routine();
 /* --------------LOOP FUNCTIONS DECLARATION-------------------- */
 
 /* Code to be executed in the background task */
-void loop_background_task();
+void loop_application_task();
 /* Code to be executed in real time in the critical task */
 void loop_critical_task();
 
@@ -77,7 +77,7 @@ void setup_routine()
 
     /* Then declare tasks */
     uint32_t background_task_number =
-                            task.createBackground(loop_background_task);
+                            task.createBackground(loop_application_task);
 
     task.createCritical(loop_critical_task, 100);
 
@@ -92,7 +92,7 @@ void setup_routine()
  * This is the code loop of the background task
  * It sends measurement through USB Serial.
  */
-void loop_background_task()
+void loop_application_task()
 {
     /* Task content */
     if (err == DATA_IS_OK)
@@ -106,7 +106,7 @@ void loop_background_task()
     }
 
     /* Pause between two runs of the task */
-    task.suspendBackgroundMs(1000);
+    task.suspendBackgroundMs(100);
 }
 
 /**

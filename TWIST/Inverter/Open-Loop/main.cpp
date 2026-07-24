@@ -351,51 +351,49 @@ void setup_routine()
  */
 void loop_communication_task()
 {
-    while (1) {
-        received_serial_char = console_getchar();
-        switch (received_serial_char) {
-        case 'h':
-            printk(" ________________________________________\n");
-            printk("|     open-loop sine PWM                 |\n");
-            printk("|     i : idle                           |\n");
-            printk("|     p : power                          |\n");
-            printk("|     u/j : amplitude +/- 1 V            |\n");
-            printk("|     d/c : amplitude +/- 5 V            |\n");
-            printk("|     r : retrieve scope data            |\n");
-            printk("|     t : trigger scope data             |\n");
-            printk("|________________________________________|\n\n");
-            break;
-        case 'i':
-            mode_asked = IDLEMODE;
-            break;
-        case 'p':
-            if (!is_downloading) {
-                scope.start();
-                mode_asked = POWERMODE;
-            }
-            break;
-        case 'u':
-            adjust_amplitude(1.0F);
-            break;
-        case 'j':
-            adjust_amplitude(-1.0F);
-            break;
-        case 'd':
-            adjust_amplitude(5.0F);
-            break;
-        case 'c':
-            adjust_amplitude(-5.0F);
-            break;
-        case 'r':
-            is_downloading = true;
-            trigger = false;
-            break;
-        case 't':
-            trigger = true;
-            break;
-        default:
-            break;
+    received_serial_char = console_getchar();
+    switch (received_serial_char) {
+    case 'h':
+        printk(" ________________________________________\n");
+        printk("|     open-loop sine PWM                 |\n");
+        printk("|     i : idle                           |\n");
+        printk("|     p : power                          |\n");
+        printk("|     u/j : amplitude +/- 1 V            |\n");
+        printk("|     d/c : amplitude +/- 5 V            |\n");
+        printk("|     r : retrieve scope data            |\n");
+        printk("|     t : trigger scope data             |\n");
+        printk("|________________________________________|\n\n");
+        break;
+    case 'i':
+        mode_asked = IDLEMODE;
+        break;
+    case 'p':
+        if (!is_downloading) {
+            scope.start();
+            mode_asked = POWERMODE;
         }
+        break;
+    case 'u':
+        adjust_amplitude(1.0F);
+        break;
+    case 'j':
+        adjust_amplitude(-1.0F);
+        break;
+    case 'd':
+        adjust_amplitude(5.0F);
+        break;
+    case 'c':
+        adjust_amplitude(-5.0F);
+        break;
+    case 'r':
+        is_downloading = true;
+        trigger = false;
+        break;
+    case 't':
+        trigger = true;
+        break;
+    default:
+        break;
     }
 }
 

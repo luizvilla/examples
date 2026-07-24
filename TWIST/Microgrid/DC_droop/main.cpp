@@ -195,6 +195,7 @@ void loop_application_task()
         spin.led.turnOn();
     }
 
+    printk("%d:", mode);
     printk("%.2f:", duty_cycle);
     printk("%.2f:", V_high);
     printk("%.2f:", I_high);

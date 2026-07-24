@@ -37,7 +37,7 @@ void setup_routine();
 /* --------------LOOP FUNCTIONS DECLARATION-------------------- */
 
 /* Code to be executed in the background task */
-void loop_background_task();
+void loop_application_task();
 /* Code to be executed in real time in the critical task */
 void loop_critical_task();
 
@@ -60,7 +60,7 @@ void setup_routine()
 {
     /* Declare task */
     uint32_t background_task_number =
-                            task.createBackground(loop_background_task);
+                            task.createBackground(loop_application_task);
 
     /* Uncomment following line if you use the critical task */
     /* task.createCritical(loop_critical_task, 500); */
@@ -79,7 +79,7 @@ void setup_routine()
  * 1000ms between each LED toggles.
  * Hence we expect the LED to blink each second.
  */
-void loop_background_task()
+void loop_application_task()
 {
     /* Task content */
     spin.led.toggle();

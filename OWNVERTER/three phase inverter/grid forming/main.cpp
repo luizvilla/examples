@@ -473,53 +473,51 @@ void setup_routine()
  */
 void loop_communication_task()
 {
-    while (1) {
-        received_serial_char = console_getchar();
-        switch (received_serial_char) {
-        case 'h':
-            printk(" ________________________________________\n");
-            printk("|     grid-forming local sine            |\n");
-            printk("|     i : idle                           |\n");
-            printk("|     p : power                          |\n");
-            printk("|     u/j : Vd reference +/- 1 V         |\n");
-            printk("|     d/c : Vd reference +/- 5 V         |\n");
-            printk("|     r : retrieve scope data            |\n");
-            printk("|     t : trigger scope data             |\n");
-            printk("|________________________________________|\n\n");
-            break;
-        case 'i':
-            mode_asked = IDLEMODE;
-            break;
-        case 'p':
-            if (!is_downloading) {
-                scope.start();
-                mode_asked = POWERMODE;
-            }
-            break;
-        case 'u':
-            adjust_voltage_reference(1.0F);
-            break;
-        case 'j':
-            adjust_voltage_reference(-1.0F);
-            break;
-        case 'd':
-            adjust_voltage_reference(5.0F);
-            break;
-        case 'c':
-            adjust_voltage_reference(-5.0F);
-            break;
-        case 'r':
-            is_downloading = true;
-            trigger = false;
-            break;
-        case 'q':
+    received_serial_char = console_getchar();
+    switch (received_serial_char) {
+    case 'h':
+        printk(" ________________________________________\n");
+        printk("|     grid-forming local sine            |\n");
+        printk("|     i : idle                           |\n");
+        printk("|     p : power                          |\n");
+        printk("|     u/j : Vd reference +/- 1 V         |\n");
+        printk("|     d/c : Vd reference +/- 5 V         |\n");
+        printk("|     r : retrieve scope data            |\n");
+        printk("|     t : trigger scope data             |\n");
+        printk("|________________________________________|\n\n");
+        break;
+    case 'i':
+        mode_asked = IDLEMODE;
+        break;
+    case 'p':
+        if (!is_downloading) {
             scope.start();
-        case 't':
-            trigger = true;
-            break;
-        default:
-            break;
+            mode_asked = POWERMODE;
         }
+        break;
+    case 'u':
+        adjust_voltage_reference(1.0F);
+        break;
+    case 'j':
+        adjust_voltage_reference(-1.0F);
+        break;
+    case 'd':
+        adjust_voltage_reference(5.0F);
+        break;
+    case 'c':
+        adjust_voltage_reference(-5.0F);
+        break;
+    case 'r':
+        is_downloading = true;
+        trigger = false;
+        break;
+    case 'q':
+        scope.start();
+    case 't':
+        trigger = true;
+        break;
+    default:
+        break;
     }
 }
 

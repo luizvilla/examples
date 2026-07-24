@@ -38,7 +38,7 @@
 void setup_routine();
 
 /* --------------LOOP FUNCTIONS DECLARATION-------------------- */
-void loop_background_task();
+void loop_application_task();
 void loop_critical_task();
 void loop_communication_task();
 
@@ -137,10 +137,10 @@ void setup_routine()
     shield.power.initBuck(ALL);
     shield.sensors.enableDefaultTwistSensors();
 
-    uint32_t background_task_number = task.createBackground(loop_background_task);
+    uint32_t application_task_number = task.createBackground(loop_application_task);
     task.createCritical(loop_critical_task, control_task_period);
 
-    task.startBackground(background_task_number);
+    task.startBackground(application_task_number);
     task.startCritical();
 
     CommTask_num = task.createBackground(loop_communication_task);
@@ -176,10 +176,10 @@ void loop_communication_task()
     }
 }
 
-void loop_background_task()
+void loop_application_task()
 {
-    printk("%u:", role_id);
     printk("%u:", mode);
+    printk("%u:", role_id);
     printk("%0.2f:", (double)voltage_ref);
     printk("%0.2f:", (double)voltage_meas);
     printk("\n");
@@ -193,7 +193,7 @@ void loop_background_task()
         spin.led.turnOff();
     }
 
-    task.suspendBackgroundMs(2000);
+    task.suspendBackgroundMs(100);
 }
 
 void loop_critical_task()

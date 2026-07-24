@@ -242,26 +242,21 @@ void loop_application_task()
 {
     if (mode == IDLEMODE)
     {
-        if (!is_downloading)
-        {
-            printk("%f:", I1_offset);
-            printk("%f:", I2_offset);
-            printk("\n");
-        }
-        else
+        if (is_downloading)
         {
             dump_scope_datas(scope);
             is_downloading = false;
         }
     }
-    else if (mode == POWERMODE)
-    {
 
-        printk("%.3f:", Iref_amplitude);
-        printk("%.3f:", duty_cycle);
-        printk("%.3f:", V1_low_value);
-        printk("\n");
-    }
+    printk("%d:", mode);
+    printk("%.3f:", Iref_amplitude);
+    printk("%.3f:", duty_cycle);
+    printk("%.3f:", V1_low_value);
+    printk("%f:", I1_offset);
+    printk("%f:", I2_offset);
+    printk("\n");
+
     task.suspendBackgroundMs(100);
 }
 

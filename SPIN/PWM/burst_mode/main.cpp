@@ -144,55 +144,52 @@ void setup_routine()
  */
 void loop_communication_task()
 {
-    while (1)
+    received_serial_char = console_getchar();
+    switch (received_serial_char)
     {
-        received_serial_char = console_getchar();
-        switch (received_serial_char)
-        {
-        case 'h':
-            /* ----------SERIAL INTERFACE MENU----------------------- */
-            printk(" ________________________________________ \n"
-                   "|     ------- MENU ---------             |\n"
-                   "|     press p : power mode               |\n"
-                   "|     press i : idle mode                |\n"
-                   "|     press e : burst mode duty UP       |\n"
-                   "|     press r : burst mode duty DOWN     |\n"
-                   "|     press t : burst mode period UP     |\n"
-                   "|     press y : burst mode period DOWN   |\n"
-                   "|     press u : phase shift UP           |\n"
-                   "|     press d : phase shift DOWN         |\n"
-                   "|________________________________________|\n\n");
-            /* ------------------------------------------------------ */
-            break;
-        case 'i':
-            printk("idle mode\n");
-            mode = IDLEMODE;
-            break;
-        case 'p':
-            printk("power mode\n");
-            mode = POWERMODE;
-            break;
-        case 'e':
-            burst_duty += 1;
-            break;
-        case 'r':
-            burst_duty -= 1;
-            break;
-        case 't':
-            burst_period += 1;
-            break;
-        case 'y':
-            burst_period -= 1;
-            break;
-        case 'u':
-            phase_shift += 0.5;
-            break;
-        case 'd':
-            phase_shift -= 0.5;
-            break;
-        default:
-            break;
-        }
+    case 'h':
+        /* ----------SERIAL INTERFACE MENU----------------------- */
+        printk(" ________________________________________ \n"
+               "|     ------- MENU ---------             |\n"
+               "|     press p : power mode               |\n"
+               "|     press i : idle mode                |\n"
+               "|     press e : burst mode duty UP       |\n"
+               "|     press r : burst mode duty DOWN     |\n"
+               "|     press t : burst mode period UP     |\n"
+               "|     press y : burst mode period DOWN   |\n"
+               "|     press u : phase shift UP           |\n"
+               "|     press d : phase shift DOWN         |\n"
+               "|________________________________________|\n\n");
+        /* ------------------------------------------------------ */
+        break;
+    case 'i':
+        printk("idle mode\n");
+        mode = IDLEMODE;
+        break;
+    case 'p':
+        printk("power mode\n");
+        mode = POWERMODE;
+        break;
+    case 'e':
+        burst_duty += 1;
+        break;
+    case 'r':
+        burst_duty -= 1;
+        break;
+    case 't':
+        burst_period += 1;
+        break;
+    case 'y':
+        burst_period -= 1;
+        break;
+    case 'u':
+        phase_shift += 0.5;
+        break;
+    case 'd':
+        phase_shift -= 0.5;
+        break;
+    default:
+        break;
     }
 }
 

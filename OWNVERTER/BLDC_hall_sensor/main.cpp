@@ -146,40 +146,38 @@ void setup_routine()
  */
 void loop_communication_task()
 {
-	while (1) {
-		received_serial_char = console_getchar();
-		switch (received_serial_char) {
-		case 'h':
-			/* ----------SERIAL INTERFACE MENU----------------------- */
+	received_serial_char = console_getchar();
+	switch (received_serial_char) {
+	case 'h':
+		/* ----------SERIAL INTERFACE MENU----------------------- */
 
-			printk(" ________________________________________ \n"
-				   "|     ------- MENU ---------             |\n"
-				   "|     press i : idle mode                |\n"
-				   "|     press p : power mode               |\n"
-				   "|     press u : duty cycle UP            |\n"
-				   "|     press d : duty cycle DOWN          |\n"
-				   "|________________________________________|\n\n");
+		printk(" ________________________________________ \n"
+			   "|     ------- MENU ---------             |\n"
+			   "|     press i : idle mode                |\n"
+			   "|     press p : power mode               |\n"
+			   "|     press u : duty cycle UP            |\n"
+			   "|     press d : duty cycle DOWN          |\n"
+			   "|________________________________________|\n\n");
 
-			/* ------------------------------------------------------ */
-			break;
-		case 'i':
-			printk("idle mode\n");
-			duty_cycle = 0.5;
-			mode = IDLEMODE;
-			break;
-		case 'p':
-			printk("power mode\n");
-			mode = POWERMODE;
-			break;
-		case 'u':
-			duty_cycle += 0.01;
-			break;
-		case 'd':
-			duty_cycle -= 0.01;
-			break;
-		default:
-			break;
-		}
+		/* ------------------------------------------------------ */
+		break;
+	case 'i':
+		printk("idle mode\n");
+		duty_cycle = 0.5;
+		mode = IDLEMODE;
+		break;
+	case 'p':
+		printk("power mode\n");
+		mode = POWERMODE;
+		break;
+	case 'u':
+		duty_cycle += 0.01;
+		break;
+	case 'd':
+		duty_cycle -= 0.01;
+		break;
+	default:
+		break;
 	}
 }
 
@@ -191,25 +189,20 @@ void loop_application_task()
 {
 	if (mode == IDLEMODE) {
 		spin.led.turnOff();
-		printk("%f:", V1_low_value);
-		printk("%f:", I2_low_value);
-		printk("%f:", V2_low_value);
-		printk("%f:", I_high);
-		printk("%f:", V_high);
-		printk("%5d:", hall_state);
-		printk("\n");
-
 	} else if (mode == POWERMODE) {
 		spin.led.turnOn();
-		printk("%5.5f:", duty_cycle);
-		printk("%f:", V1_low_value);
-		printk("%f:", I2_low_value);
-		printk("%f:", V2_low_value);
-		printk("%f:", I_high);
-		printk("%f:", V_high);
-		printk("%5d:", hall_state);
-		printk("\n");
 	}
+
+	printk("%d:", mode);
+	printk("%5.5f:", duty_cycle);
+	printk("%f:", V1_low_value);
+	printk("%f:", I2_low_value);
+	printk("%f:", V2_low_value);
+	printk("%f:", I_high);
+	printk("%f:", V_high);
+	printk("%5d:", hall_state);
+	printk("\n");
+
 	task.suspendBackgroundMs(100);
 }
 

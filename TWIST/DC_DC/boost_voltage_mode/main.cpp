@@ -180,16 +180,17 @@ void loop_application_task()
     else if (mode == POWERMODE)
     {
         spin.led.turnOn();
-
-        printk("%.3f:", (double)I1_low_value);
-        printk("%.3f:", (double)V1_low_value);
-        printk("%.3f:", (double)I_high);
-        printk("%.3f:", (double)V_high);
-        printk("%.3f:", (double)voltage_reference);
-        printk("\n");
     }
 
-    task.suspendBackgroundMs(1000);
+    printk("%d:", mode);
+    printk("%.3f:", (double)I1_low_value);
+    printk("%.3f:", (double)V1_low_value);
+    printk("%.3f:", (double)I_high);
+    printk("%.3f:", (double)V_high);
+    printk("%.3f:", (double)voltage_reference);
+    printk("\n");
+
+    task.suspendBackgroundMs(100);
 }
 
 /**

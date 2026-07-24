@@ -36,7 +36,7 @@ void setup_routine();
 
 /* --------------LOOP FUNCTIONS DECLARATION-------------------- */
 /* Code to be executed in the background task */
-void loop_background_task();
+void loop_application_task();
 /* Code to be executed in real time in the critical task */
 void loop_critical_task();
 
@@ -61,7 +61,7 @@ void setup_routine()
 
     /* Then declare tasks */
     uint32_t background_task_number =
-                        task.createBackground(loop_background_task);
+                        task.createBackground(loop_application_task);
 
     /* Uncomment following line if you want to use the critical task */
     /* task.createCritical(loop_critical_task, 500); */
@@ -78,7 +78,7 @@ void setup_routine()
  * This is the code loop of the background task
  * Here we retrieve value from the encoder, and then print it over USB serial.
  */
-void loop_background_task()
+void loop_application_task()
 {
     /* Task content */
     incremental_value_timer_3 = spin.timer.getIncrementalEncoderValue(TIMER3);

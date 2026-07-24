@@ -37,7 +37,7 @@ void setup_routine();
 /* --------------LOOP FUNCTIONS DECLARATION-------------------- */
 
 /* Code to be executed in the background task */
-void loop_background_task();
+void loop_application_task();
 /* Code to be executed in real time in the critical task */
 void loop_critical_task();
 
@@ -61,7 +61,7 @@ void setup_routine()
     spin.dac.setConstValue(2, 1, 0);
 
     uint32_t background_task_number =
-                            task.createBackground(loop_background_task);
+                            task.createBackground(loop_application_task);
 
     /* task.createCritical(loop_critical_task, 100); */
 
@@ -77,7 +77,7 @@ void setup_routine()
  * This is the code loop of the background task
  * Here it changes the DAC value.
  */
-void loop_background_task()
+void loop_application_task()
 {
     /* Task content */
 

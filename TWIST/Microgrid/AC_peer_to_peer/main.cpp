@@ -300,27 +300,24 @@ void loop_application_task()
             dump_scope_datas(scope);
         }
         is_downloading = false;
-
-
     }
     else if (mode == POWERMODE)
     {
         spin.led.turnOn();
+    }
 
 #ifndef GENERATOR
-        printk("%i:", status);
-        printk("%.3f:", v_dc_ref);
-        printk("%.3f:", V_high);
-        printk("%.3f:", duty_cycle);
-        printk("%.3f:", I2_low_value);
-        printk("%.3f:", I1_low_value);
-        printk("%f:", V1_low_value);
-        printk("\n");
+    printk("%d:", mode);
+    printk("%i:", status);
+    printk("%.3f:", v_dc_ref);
+    printk("%.3f:", V_high);
+    printk("%.3f:", duty_cycle);
+    printk("%.3f:", I2_low_value);
+    printk("%.3f:", I1_low_value);
+    printk("%f:", V1_low_value);
+    printk("\n");
 #endif
 
-
-
-    }
     task.suspendBackgroundMs(100);
 }
 

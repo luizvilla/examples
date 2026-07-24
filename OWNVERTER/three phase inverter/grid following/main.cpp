@@ -603,64 +603,62 @@ void setup_routine()
  */
 void loop_communication_task()
 {
-    while (1) {
-        received_serial_char = console_getchar();
-        switch (received_serial_char) {
-        case 'h':
-            printk(" ________________________________________\n");
-            printk("|     grid-following PLL                 |\n");
-            printk("|     i : idle                           |\n");
-            printk("|     p : power after PLL sync           |\n");
-            printk("|     1 : PLL input from local sine      |\n");
-            printk("|     2 : PLL input from V1_LOW - V2_LOW |\n");
-            printk("|     u/j : Id reference +/- 0.1 A       |\n");
-            printk("|     d/c : Id reference +/- 1 A         |\n");
-            printk("|     r : retrieve scope data            |\n");
-            printk("|     t : trigger scope data             |\n");
-            printk("|________________________________________|\n\n");
-            break;
-        case 'i':
-            mode_asked = IDLEMODE;
-            break;
-        case 'p':
-            if (!is_downloading) {
-                scope.start();
-                mode_asked = POWERMODE;
-            }
-            break;
-        case '1':
-            configure_following_input(LOCAL_SINE_INPUT);
-            printk("PLL input: local sine\n");
-            break;
-        case '2':
-            configure_following_input(MEASURED_GRID_INPUT);
-            printk("PLL input: measured V1_LOW - V2_LOW\n");
-            break;
-        case 'u':
-            adjust_current_reference(0.1F);
-            break;
-        case 'j':
-            adjust_current_reference(-0.1F);
-            break;
-        case 'd':
-            adjust_current_reference(1.0F);
-            break;
-        case 'c':
-            adjust_current_reference(-1.0F);
-            break;
-        case 'q':
+    received_serial_char = console_getchar();
+    switch (received_serial_char) {
+    case 'h':
+        printk(" ________________________________________\n");
+        printk("|     grid-following PLL                 |\n");
+        printk("|     i : idle                           |\n");
+        printk("|     p : power after PLL sync           |\n");
+        printk("|     1 : PLL input from local sine      |\n");
+        printk("|     2 : PLL input from V1_LOW - V2_LOW |\n");
+        printk("|     u/j : Id reference +/- 0.1 A       |\n");
+        printk("|     d/c : Id reference +/- 1 A         |\n");
+        printk("|     r : retrieve scope data            |\n");
+        printk("|     t : trigger scope data             |\n");
+        printk("|________________________________________|\n\n");
+        break;
+    case 'i':
+        mode_asked = IDLEMODE;
+        break;
+    case 'p':
+        if (!is_downloading) {
             scope.start();
-            break;
-        case 'r':
-            is_downloading = true;
-            trigger = false;
-            break;
-        case 't':
-            trigger = true;
-            break;
-        default:
-            break;
+            mode_asked = POWERMODE;
         }
+        break;
+    case '1':
+        configure_following_input(LOCAL_SINE_INPUT);
+        printk("PLL input: local sine\n");
+        break;
+    case '2':
+        configure_following_input(MEASURED_GRID_INPUT);
+        printk("PLL input: measured V1_LOW - V2_LOW\n");
+        break;
+    case 'u':
+        adjust_current_reference(0.1F);
+        break;
+    case 'j':
+        adjust_current_reference(-0.1F);
+        break;
+    case 'd':
+        adjust_current_reference(1.0F);
+        break;
+    case 'c':
+        adjust_current_reference(-1.0F);
+        break;
+    case 'q':
+        scope.start();
+        break;
+    case 'r':
+        is_downloading = true;
+        trigger = false;
+        break;
+    case 't':
+        trigger = true;
+        break;
+    default:
+        break;
     }
 }
 

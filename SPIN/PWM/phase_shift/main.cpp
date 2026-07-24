@@ -52,14 +52,6 @@ float32_t duty_cycle = 0.3;
 float32_t phase_shift = 180;
 
 /*------------------------------------------------------------- */
-/* List of possible modes for OwnTech Board */
-enum serial_interface_menu_mode
-{
-    IDLEMODE = 0,
-    POWERMODE
-};
-
-uint8_t mode = IDLEMODE;
 
 /* --------------SETUP FUNCTIONS------------------------------- */
 
@@ -150,7 +142,7 @@ void loop_application_task()
     printk("\n");
 
     /* Pause between two runs of the task */
-    task.suspendBackgroundMs(1000);
+    task.suspendBackgroundMs(100);
 
 }
 

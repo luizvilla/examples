@@ -199,6 +199,7 @@ void loop_application_task()
         spin.led.turnOn();
 
     }
+    printk("%d:", mode);
     printk("%.3f:", (double)I1_low_value);
     printk("%.3f:", (double)V1_low_value);
     printk("%.3f:", (double)I2_low_value);

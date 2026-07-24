@@ -377,29 +377,20 @@ switch (mode) {
 
     if (mode == IDLEMODE)
     {
-        if (!is_downloading) {
-            printk("%d:", mode);
-            printk("% 7.3f:", Vgrid_amplitude_ref);
-            printk("% 7.3f:", I1_low_value);
-            printk("% 7.3f:", I2_low_value);
-            printk("% 7.3f:", V1_low_value);
-            printk("\n");
-        }
-        else {
+        if (is_downloading) {
             dump_scope_datas(scope);
             is_downloading = false;
         }
     }
-    else
-    {
-        printk("%d:", mode);
-        printk("% 6.2f:", Vgrid_amplitude_ref);
-        printk("% 6.2f:", Vgrid_amplitude);
-        printk("% 7.3f:", I1_low_value);
-        printk("% 7.3f:", I2_low_value);
-        printk("% 6.2f:", V1_low_value);
-        printk("\n");
-    }
+
+    printk("%d:", mode);
+    printk("% 6.2f:", Vgrid_amplitude_ref);
+    printk("% 6.2f:", Vgrid_amplitude);
+    printk("% 7.3f:", I1_low_value);
+    printk("% 7.3f:", I2_low_value);
+    printk("% 6.2f:", V1_low_value);
+    printk("\n");
+
     task.suspendBackgroundMs(100);
 }
 

@@ -11,8 +11,8 @@
 #include "zephyr/console/console.h"
 
 void setup_routine();
-void loop_background_task();
-void application_task();
+void loop_communication_task();
+void loop_application_task();
 void loop_critical_task();
 
 static const float32_t Ts = 100.0e-6F;
@@ -96,16 +96,16 @@ void setup_routine()
 	scope.set_delay(0.0F);
 	scope.start();
 
-	uint32_t background_task_number = task.createBackground(loop_background_task);
-	uint32_t application_task_number = task.createBackground(application_task);
+	uint32_t communication_task_number = task.createBackground(loop_communication_task);
+	uint32_t application_task_number = task.createBackground(loop_application_task);
 	task.createCritical(loop_critical_task, 100);
 
-	task.startBackground(background_task_number);
+	task.startBackground(communication_task_number);
 	task.startBackground(application_task_number);
 	task.startCritical();
 }
 
-void loop_background_task()
+void loop_communication_task()
 {
 	received_serial_char = console_getchar();
 	switch (received_serial_char) {
@@ -156,7 +156,7 @@ void loop_background_task()
 	}
 }
 
-void application_task()
+void loop_application_task()
 {
 	if (!memory_print) {
 		printk("%u:", mode);
@@ -182,7 +182,7 @@ void application_task()
 		is_downloading = false;
 	}
 
-	task.suspendBackgroundMs(200);
+	task.suspendBackgroundMs(100);
 }
 
 void loop_critical_task()
