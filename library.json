@@ -242,6 +242,24 @@
             ]
         },
         {
+            "name": "ThingSet Serial Communication",
+            "title": "ThingSet Serial Communication",
+            "description": "Exposes data over the Zephyr shell using the ThingSet protocol on a dedicated USB-CDC serial port, separate from the console.",
+            "group": "Examples TWIST - COMM",
+            "base": "TWIST/Communication/ThingSet_Serial",
+            "files": [
+                "main.cpp",
+                "user_data_objects.h",
+                "app.conf",
+                "app.overlay",
+                "tools/thingset_tools.py",
+                "tools/thingset_example.py",
+                "tools/ThingSetTools.m",
+                "tools/thingset_example.m",
+                "README.md"
+            ]
+        },
+        {
             "name": "AC client server",
             "title": "AC client server",
             "description": "implementation of AC client server in microgrid",
