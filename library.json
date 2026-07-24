@@ -58,6 +58,18 @@
             ]
         },
         {
+            "name": "Twist Measurements Enable",
+            "title": "Twist Measurements Enable",
+            "description": "Initializes the Twist power shield in Buck mode and enables the default measurements without ever starting the PWM, so there is no power flow. Just reads and prints leg currents/voltages and the high side current/voltage over serial.",
+            "group": "Examples TWIST - Basic",
+            "base": "TWIST/Basic/measurements_enable",
+            "files": [
+                "main.cpp",
+                "app.ini",
+                "README.md"
+            ]
+        },
+        {
             "name": "Voltage Mode Buck",
             "title": "Voltage Mode Buck",
             "description": "Voltage mode buck converter using PID controller for TWIST",
