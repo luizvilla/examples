@@ -397,7 +397,8 @@ switch (mode) {
         printk("% 6.2f:", Vgrid_amplitude);
         printk("% 7.3f:", I1_low_value);
         printk("% 7.3f:", I2_low_value);
-        printk("% 6.2f:\n", V1_low_value);
+        printk("% 6.2f:", V1_low_value);
+        printk("\n");
     }
     task.suspendBackgroundMs(100);
 }

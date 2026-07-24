@@ -178,8 +178,11 @@ void loop_communication_task()
 
 void loop_background_task()
 {
-    printk("role=%u mode=%u vref=%0.2f vmeas=%0.2f rx=%u\n",
-           role_id, mode, (double)voltage_ref, (double)voltage_meas);
+    printk("%u:", role_id);
+    printk("%u:", mode);
+    printk("%0.2f:", (double)voltage_ref);
+    printk("%0.2f:", (double)voltage_meas);
+    printk("\n");
 
     if (mode == POWERMODE)
     {

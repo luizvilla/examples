@@ -159,22 +159,22 @@ void loop_background_task()
 void application_task()
 {
 	if (!memory_print) {
-		printk("mode:%u angle:%.2f freq:%.2f mod:%.2f da:%.3f db:%.3f dc:%.3f\n",
-		       mode,
-		       (double)electrical_angle,
-		       (double)electrical_frequency_hz,
-		       (double)modulation_index,
-		       (double)duty_a,
-		       (double)duty_b,
-		       (double)duty_c);
+		printk("%u:", mode);
+		printk("%.2f:", (double)electrical_angle);
+		printk("%.2f:", (double)electrical_frequency_hz);
+		printk("%.2f:", (double)modulation_index);
+		printk("%.3f:", (double)duty_a);
+		printk("%.3f:", (double)duty_b);
+		printk("%.3f:", (double)duty_c);
+		printk("\n");
 	} else {
 		k_app_idx = (k_app_idx + 1) % SCOPE_SIZE;
-		printk("%.3f:%.3f:%.3f:%.2f:%.1f\n",
-		       (double)scope.get_channel_value(k_app_idx, 0),
-		       (double)scope.get_channel_value(k_app_idx, 1),
-		       (double)scope.get_channel_value(k_app_idx, 2),
-		       (double)scope.get_channel_value(k_app_idx, 3),
-		       (double)scope.get_channel_value(k_app_idx, 4));
+		printk("%.3f:", (double)scope.get_channel_value(k_app_idx, 0));
+		printk("%.3f:", (double)scope.get_channel_value(k_app_idx, 1));
+		printk("%.3f:", (double)scope.get_channel_value(k_app_idx, 2));
+		printk("%.2f:", (double)scope.get_channel_value(k_app_idx, 3));
+		printk("%.1f:", (double)scope.get_channel_value(k_app_idx, 4));
+		printk("\n");
 	}
 
 	if (is_downloading) {

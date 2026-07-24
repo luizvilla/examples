@@ -195,8 +195,9 @@ void loop_application_task()
 		printk("%f:", I2_low_value);
 		printk("%f:", V2_low_value);
 		printk("%f:", I_high);
-		printk("%f", V_high);
-		printk("%5d\n", hall_state);
+		printk("%f:", V_high);
+		printk("%5d:", hall_state);
+		printk("\n");
 
 	} else if (mode == POWERMODE) {
 		spin.led.turnOn();
@@ -205,8 +206,9 @@ void loop_application_task()
 		printk("%f:", I2_low_value);
 		printk("%f:", V2_low_value);
 		printk("%f:", I_high);
-		printk("%f", V_high);
-		printk("%5d\n", hall_state);
+		printk("%f:", V_high);
+		printk("%5d:", hall_state);
+		printk("\n");
 	}
 	task.suspendBackgroundMs(100);
 }

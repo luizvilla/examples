@@ -546,16 +546,16 @@ void loop_application_task()
         dump_scope_datas(scope);
         is_downloading = false;
     } else {
-        printk("state %d:Vdc %.2f:Vlocal %.2f:Vdref %.2f:Vd %.2f:Id %.2f:d1 %.3f:d2 %.3f: delta_duty_cycle %.6f\n",
-               mode,
-               static_cast<double>(V_high_filt),
-               static_cast<double>(local_vgrid),
-               static_cast<double>(Vdq_ref.d),
-               static_cast<double>(Vdq.d),
-               static_cast<double>(Idq.d),
-               static_cast<double>(duty_cycle_1),
-               static_cast<double>(duty_cycle_2),
-               static_cast<double>(delta_duty_cycle));
+        printk("%d:", mode);
+        printk("%.2f:", static_cast<double>(V_high_filt));
+        printk("%.2f:", static_cast<double>(local_vgrid));
+        printk("%.2f:", static_cast<double>(Vdq_ref.d));
+        printk("%.2f:", static_cast<double>(Vdq.d));
+        printk("%.2f:", static_cast<double>(Idq.d));
+        printk("%.3f:", static_cast<double>(duty_cycle_1));
+        printk("%.3f:", static_cast<double>(duty_cycle_2));
+        printk("%.6f:", static_cast<double>(delta_duty_cycle));
+        printk("\n");
     }
 
     task.suspendBackgroundMs(100);

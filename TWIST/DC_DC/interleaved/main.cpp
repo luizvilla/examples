@@ -191,7 +191,8 @@ void loop_application_task()
         printk("%.3f:", (double)I2_low_value);
         printk("%.3f:", (double)V2_low_value);
         printk("%.3f:", (double)I_high);
-        printk("%f\n", (double)V_high);
+        printk("%f:", (double)V_high);
+        printk("\n");
     }
     task.suspendBackgroundMs(100);
 }

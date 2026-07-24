@@ -142,12 +142,14 @@ void loop_background_task()
 void application_task()
 {
 	if (!memory_print) {
-		printk("mode:%u duty:%.3f\n", mode, (double)duty_cycle);
+		printk("%u:", mode);
+		printk("%.3f:", (double)duty_cycle);
+		printk("\n");
 	} else {
 		k_app_idx = (k_app_idx + 1) % SCOPE_SIZE;
-		printk("%.3f:%.1f\n",
-		       (double)scope.get_channel_value(k_app_idx, 0),
-		       (double)scope.get_channel_value(k_app_idx, 1));
+		printk("%.3f:", (double)scope.get_channel_value(k_app_idx, 0));
+		printk("%.1f:", (double)scope.get_channel_value(k_app_idx, 1));
+		printk("\n");
 	}
 
 	if (is_downloading) {

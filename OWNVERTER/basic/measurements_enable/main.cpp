@@ -126,18 +126,18 @@ void loop_application_task()
 {
 	retrieve_temperatures();
 
-	printk("Vhigh:%.2f Ihigh:%.2f V1:%.2f V2:%.2f V3:%.2f I1:%.2f I2:%.2f I3:%.2f T1:%.2f T2:%.2f T3:%.2f\n",
-	       (double)V_high,
-	       (double)I_high,
-	       (double)V1_low_value,
-	       (double)V2_low_value,
-	       (double)V3_low_value,
-	       (double)I1_low_value,
-	       (double)I2_low_value,
-	       (double)I3_low_value,
-	       (double)T1_value,
-	       (double)T2_value,
-	       (double)T3_value);
+	printk("%.2f:", (double)V_high);
+	printk("%.2f:", (double)I_high);
+	printk("%.2f:", (double)V1_low_value);
+	printk("%.2f:", (double)V2_low_value);
+	printk("%.2f:", (double)V3_low_value);
+	printk("%.2f:", (double)I1_low_value);
+	printk("%.2f:", (double)I2_low_value);
+	printk("%.2f:", (double)I3_low_value);
+	printk("%.2f:", (double)T1_value);
+	printk("%.2f:", (double)T2_value);
+	printk("%.2f:", (double)T3_value);
+	printk("\n");
 
 	task.suspendBackgroundMs(200);
 }

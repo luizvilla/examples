@@ -314,7 +314,8 @@ void loop_application_task()
         printk("%.3f:", duty_cycle);
         printk("%.3f:", I2_low_value);
         printk("%.3f:", I1_low_value);
-        printk("%f:\n", V1_low_value);
+        printk("%f:", V1_low_value);
+        printk("\n");
 #endif
 
 

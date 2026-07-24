@@ -432,14 +432,14 @@ void loop_application_task()
         dump_scope_datas(scope);
         is_downloading = false;
     } else {
-        printk("state %d:Vdc %.2f:Vgrid %.2f:Vlocal %.2f:amp %.2f:d1 %.3f:d2 %.3f\n",
-               mode,
-               static_cast<double>(V_high_filt),
-               static_cast<double>(Vgrid_meas),
-               static_cast<double>(local_vgrid),
-               static_cast<double>(local_voltage_amplitude),
-               static_cast<double>(duty_cycle_1),
-               static_cast<double>(duty_cycle_2));
+        printk("%d:", mode);
+        printk("%.2f:", static_cast<double>(V_high_filt));
+        printk("%.2f:", static_cast<double>(Vgrid_meas));
+        printk("%.2f:", static_cast<double>(local_vgrid));
+        printk("%.2f:", static_cast<double>(local_voltage_amplitude));
+        printk("%.3f:", static_cast<double>(duty_cycle_1));
+        printk("%.3f:", static_cast<double>(duty_cycle_2));
+        printk("\n");
     }
 
     task.suspendBackgroundMs(100);

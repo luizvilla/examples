@@ -203,7 +203,8 @@ void loop_application_task()
     printk("%.2f:", V2_low_value);
     printk("%.2f:", I2_low_value);
     printk("%.2f:", reference);
-    printk("%.2f\n", I1_low_value+I2_low_value);
+    printk("%.2f:", I1_low_value+I2_low_value);
+    printk("\n");
 
     task.suspendBackgroundMs(100);
 }

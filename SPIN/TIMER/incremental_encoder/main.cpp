@@ -83,7 +83,9 @@ void loop_background_task()
     /* Task content */
     incremental_value_timer_3 = spin.timer.getIncrementalEncoderValue(TIMER3);
     incremental_value_timer_4 = spin.timer.getIncrementalEncoderValue(TIMER4);
-    printk("TIM3: %u , TIM4: %d\n", incremental_value_timer_3, incremental_value_timer_4);
+    printk("%u:", incremental_value_timer_3);
+    printk("%d:", incremental_value_timer_4);
+    printk("\n");
 
     /* Pause between two runs of the task */
     task.suspendBackgroundMs(100);

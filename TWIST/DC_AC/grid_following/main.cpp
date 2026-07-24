@@ -244,8 +244,9 @@ void loop_application_task()
     {
         if (!is_downloading)
         {
-            printk("I1_offset = %f:", I1_offset);
-            printk("I2_offset = %f\n", I2_offset);
+            printk("%f:", I1_offset);
+            printk("%f:", I2_offset);
+            printk("\n");
         }
         else
         {

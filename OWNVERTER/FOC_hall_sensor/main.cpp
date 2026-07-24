@@ -548,13 +548,14 @@ void loop_background_task()
 void application_task()
 {
 	if (!memory_print) {
-		printk("%7.2f", V_high);
+		printk("%7.2f:", V_high);
 		printk("%7.2f:", k_angle_offset);
 		printk("%7.2f:", Iq_max);
 		printk("%7.2f:", manual_Iq_ref);
 		printk("%7.2f:", I1_offset);
 		printk("%7d:", control_state);
-		printk("%7d\n", angle_index);
+		printk("%7d:", angle_index);
+		printk("\n");
 
 	} else {
 		/* If memory_print is true then we plot scope datas in an infinite loop

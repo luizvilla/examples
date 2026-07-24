@@ -185,7 +185,8 @@ void loop_application_task()
         printk("%.3f:", (double)V1_low_value);
         printk("%.3f:", (double)I_high);
         printk("%.3f:", (double)V_high);
-        printk("%.3f\n", (double)voltage_reference);
+        printk("%.3f:", (double)voltage_reference);
+        printk("\n");
     }
 
     task.suspendBackgroundMs(1000);

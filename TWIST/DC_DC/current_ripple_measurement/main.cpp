@@ -251,7 +251,8 @@ void loop_application_task()
         printk("% 7.2f:", (double)duty_cycle);
         printk("% 7d:", num_trig_ratio_point);
         printk("% 7.2f:", (double)V_high);
-        printk("% 7.2f\n", (double)V1_low_value);
+        printk("% 7.2f:", (double)V1_low_value);
+        printk("\n");
         }
         spin.led.turnOff();
     }
@@ -262,7 +263,8 @@ void loop_application_task()
         printk("% 7.2f:", (double)duty_cycle);
         printk("% 7d:", num_trig_ratio_point);
         printk("% 7.2f:", (double)V_high);
-        printk("% 7.2f\n", (double)V1_low_value);
+        printk("% 7.2f:", (double)V1_low_value);
+        printk("\n");
     }
     task.suspendBackgroundMs(250);
 }

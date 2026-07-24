@@ -79,7 +79,8 @@ void loop_background_task()
     /* Task content */
     if (err == DATA_IS_OK)
     {
-        printk("%f\n", (double)adc_value);
+        printk("%f:", (double)adc_value);
+        printk("\n");
     }
     else
     {

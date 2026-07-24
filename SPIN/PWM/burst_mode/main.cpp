@@ -203,9 +203,10 @@ void loop_communication_task()
 void loop_application_task()
 {
     /* Task content */
-    printk("phase shift: %f\n", phase_shift);
-    printk("burst mode duty: %d\n", burst_duty);
-    printk("burst mode period: %d\n", burst_period);
+    printk("%f:", phase_shift);
+    printk("%d:", burst_duty);
+    printk("%d:", burst_period);
+    printk("\n");
     /* Pause between two runs of the task */
     task.suspendBackgroundMs(100);
 }

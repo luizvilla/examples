@@ -173,7 +173,8 @@ void loop_communication_task()
 void loop_application_task()
 {
     /* Task content */
-    printk("%f\n", (double)duty_cycle);
+    printk("%f:", (double)duty_cycle);
+    printk("\n");
 
     /* Pause between two runs of the task */
     task.suspendBackgroundMs(1000);

@@ -290,7 +290,8 @@ void loop_application_task()
         printk("%.3f:", (double)Vgrid);
         printk("%.3f:", (double)I2_low_value);
         printk("%.3f:", (double)I1_low_value);
-        printk("%f:\n", (double)V1_low_value);
+        printk("%f:", (double)V1_low_value);
+        printk("\n");
     }
     task.suspendBackgroundMs(100);
 }

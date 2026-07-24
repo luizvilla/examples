@@ -666,19 +666,17 @@ void loop_application_task()
         dump_scope_datas(scope);
         is_downloading = false;
     } else {
-        printk("state %d:input %d:sync %d:Vdc %.2f"
-               ":Vpll %.2f:Vgrid %.2f:Vlocal %.2f"
-               ":Idref %.2f:Id %.2f:omega %.0f\n",
-               mode,
-               following_input_mode,
-               is_net_synchronized ? 1 : 0,
-               static_cast<double>(V_high_filt),
-               static_cast<double>(pll_vgrid_input),
-               static_cast<double>(Vgrid_meas),
-               static_cast<double>(local_vgrid),
-               static_cast<double>(Idq_ref.d),
-               static_cast<double>(Idq.d),
-               static_cast<double>(omega));
+        printk("%d:", mode);
+        printk("%d:", following_input_mode);
+        printk("%d:", is_net_synchronized ? 1 : 0);
+        printk("%.2f:", static_cast<double>(V_high_filt));
+        printk("%.2f:", static_cast<double>(pll_vgrid_input));
+        printk("%.2f:", static_cast<double>(Vgrid_meas));
+        printk("%.2f:", static_cast<double>(local_vgrid));
+        printk("%.2f:", static_cast<double>(Idq_ref.d));
+        printk("%.2f:", static_cast<double>(Idq.d));
+        printk("%.0f:", static_cast<double>(omega));
+        printk("\n");
     }
 
     task.suspendBackgroundMs(100);

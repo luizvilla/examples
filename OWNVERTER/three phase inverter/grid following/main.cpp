@@ -704,21 +704,22 @@ void loop_application_task()
         dump_scope_datas(scope);
         is_downloading = false;
     } else {
-        printk("state %d:input %d:sync %d:Vdc %.2f"
-               ":Vpll %.2f:Vgrid %.2f:Vlocal %.2f"
-               ":Idref %.2f:Id %.2f:Vdref %.2f:Vd %.2f:Vq %.2f\n",
-               mode,
-               following_input_mode,
-               is_net_synchronized ? 1 : 0,
-               static_cast<double>(V_high_filt),
-               static_cast<double>(pll_vgrid_input.a),
-               static_cast<double>(Vgrid_meas.a),
-               static_cast<double>(local_vgrid.a),
-               static_cast<double>(Idq_ref.d),
-               static_cast<double>(Idq.d),
-               static_cast<double>(Vdq.d),
-               static_cast<double>(Vdq_output.d), //I plot Vdq_output instead of Vdq directly, because Vdq output is the one we are supposed to calculate, and Vdq is just a sinewave converted to dc
-               static_cast<double>(Vdq_output.q));
+        printk("%d:", mode);
+        printk("%d:", following_input_mode);
+        printk("%d:", is_net_synchronized ? 1 : 0);
+        printk("%.2f:", static_cast<double>(V_high_filt));
+        printk("%.2f:", static_cast<double>(pll_vgrid_input.a));
+        printk("%.2f:", static_cast<double>(Vgrid_meas.a));
+        printk("%.2f:", static_cast<double>(local_vgrid.a));
+        printk("%.2f:", static_cast<double>(Idq_ref.d));
+        printk("%.2f:", static_cast<double>(Idq.d));
+        printk("%.2f:", static_cast<double>(Vdq.d));
+        /* Vdq_output is plotted instead of Vdq directly, because Vdq_output
+         * is the one we are supposed to calculate, and Vdq is just a
+         * sinewave converted to dc */
+        printk("%.2f:", static_cast<double>(Vdq_output.d));
+        printk("%.2f:", static_cast<double>(Vdq_output.q));
+        printk("\n");
     }
 
     task.suspendBackgroundMs(100);
