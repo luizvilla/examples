@@ -22,9 +22,14 @@ Here you can find ready-to-use examples for [SPIN](https://github.com/owntech-fo
     - [DC client server](TWIST/Microgrid/DC_client_server/README.md)
     - [DC droop](TWIST/Microgrid/DC_droop/README.md)
 
-- DC-AC topology examples
-    - [Grid forming](TWIST/DC_AC/grid_forming/README.md)
-    - [Grid following](TWIST/DC_AC/grid_following/README.md)
+- Inverter examples (Proportional Resonant control)
+    - [Grid forming](TWIST/Inverter/Proportional%20Resonant/grid_forming/README.md)
+    - [Grid following](TWIST/Inverter/Proportional%20Resonant/grid_following/README.md)
+
+- Inverter examples (DQ / Vector control)
+    - [Open-Loop Sine Inverter](TWIST/Inverter/DQ/Open-Loop/README.md)
+    - [Grid Forming Inverter](TWIST/Inverter/DQ/Grid%20Forming/README.md)
+    - [Grid Following Inverter](TWIST/Inverter/DQ/Grid%20Following/README.md)
 
 - Communication examples
     - [CAN Communication](TWIST/Communication/CAN/README.md)

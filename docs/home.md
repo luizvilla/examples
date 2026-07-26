@@ -114,7 +114,7 @@ Get on track using featured examples :
 
     Good starting point to discover AC world. 
 
-    [:octicons-arrow-right-24: Grid Forming Inverter ](https://docs.owntech.org/latest/examples/TWIST/DC_AC/grid_forming/)    
+    [:octicons-arrow-right-24: Grid Forming Inverter ](https://docs.owntech.org/latest/examples/TWIST/Inverter/Proportional%20Resonant/grid_forming/)    
 
 
 
@@ -124,7 +124,7 @@ Get on track using featured examples :
     
     Get in sync with the grid !
 
-    [:octicons-arrow-right-24: Grid Following Inverter](https://docs.owntech.org/latest/examples/TWIST/DC_AC/grid_following/)  
+    [:octicons-arrow-right-24: Grid Following Inverter](https://docs.owntech.org/latest/examples/TWIST/Inverter/Proportional%20Resonant/grid_following/)  
 
 </div>
 
