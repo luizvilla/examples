@@ -366,7 +366,7 @@ void configure_following_input(FollowingInputMode requested_mode)
     delta_duty_cycle = 0.5F;
     duty_cycle_1 = 0.5F;
     duty_cycle_2 = 0.5F;
-    inverter.init(FOLLOWING, DC_BUS_FALLBACK, local_voltage_amplitude, W0, TS);
+    inverter.init(FOLLOWING, BIPOLAR, DC_BUS_FALLBACK, local_voltage_amplitude, W0, TS);
     inverter.setPowerOn(false);
     stop_pwm_outputs();
 }
