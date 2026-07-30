@@ -436,7 +436,7 @@ void setup_routine()
     Vdq_ref.d = local_voltage_amplitude;
     Vdq_ref.q = 0.0F;
     setup_scope();
-    inverter.init(FORMING, DC_BUS_FALLBACK, local_voltage_amplitude, W0, TS);
+    inverter.init(FORMING, BIPOLAR, DC_BUS_FALLBACK, local_voltage_amplitude, W0, TS);
 
     uint32_t app_task_number = task.createBackground(loop_application_task);
     uint32_t com_task_number = task.createBackground(loop_communication_task);

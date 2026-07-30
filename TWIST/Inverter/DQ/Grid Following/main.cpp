@@ -552,7 +552,7 @@ void setup_routine()
     Idq_ref_delta.d = 0.0F;
     Idq_ref_delta.q = 0.0F;
     setup_scope();
-    inverter.init(FOLLOWING, DC_BUS_FALLBACK, local_voltage_amplitude, W0, TS);
+    inverter.init(FOLLOWING, BIPOLAR, DC_BUS_FALLBACK, local_voltage_amplitude, W0, TS);
 
     uint32_t app_task_number = task.createBackground(loop_application_task);
     uint32_t com_task_number = task.createBackground(loop_communication_task);
