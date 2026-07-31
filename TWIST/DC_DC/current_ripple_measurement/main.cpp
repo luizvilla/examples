@@ -147,7 +147,7 @@ void setup_routine()
     /* Buck voltage mode */
     shield.power.initBuck(ALL);
 
-    shield.sensors.enableDefaultTwistSensors();
+    shield.sensors.enableDefaultSensors();
 
     pid.init(pid_params);
 
@@ -316,7 +316,7 @@ void loop_critical_task()
             if (trig_ratio > end_trig_ratio) {
                 trig_ratio = begin_trig_ratio;
             }
-            shield.power.setTriggerValue(LEG1, trig_ratio);
+            shield.power.setTriggerValue(ALL, trig_ratio);
         }
         scope.acquire();
     }

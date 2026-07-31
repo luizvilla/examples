@@ -1,0 +1,7 @@
+&leg1 {
+	default-modulation = "Lft_aligned";
+};
+
+&leg2 {
+	default-modulation = "Lft_aligned";
+};

@@ -92,7 +92,7 @@ The code structure is as follows:
             if (trig_ratio > end_trig_ratio) {
                 trig_ratio = begin_trig_ratio;
             }
-            shield.power.setTriggerValue(LEG1, trig_ratio);
+            shield.power.setTriggerValue(ALL, trig_ratio);
         }
     ```
 
@@ -141,51 +141,19 @@ To rebuild the current waveform, we will use the `trig_ratio` variable to perfor
     
     Thus it is necessary to change the modulation of the Twist board to `Lft_aligned`. 
 
-### Find the `twist_v1_4_1.overlay` file.
-To see the file `zephyr/boards/shields/twist/twist_v1_4_1.overlay` in vscode, you must toggle in Expert Mode.
+### The overlay does the job.
 
-![expert mode](Image/expert_mode.png)
-
-Then you should see the directory tree of `zephyr`. 
-
-![find the file](Image/zephyr_tree.png)
-
-In the `zephyr/boards/shields/twist/twist_v1_4_1.overlay`, change modulation as shown below:
+The overlay file on the `/src` folder rewires the low level modulation:  
 
 ```ts
-        leg1: leg1{
-            leg-name = "LEG1";
-			pwms = <&pwma 1 0>, <&pwma 2 0>;
-            pwm-pin-num = <12 14>;
-            capa-pin-num = <7>;
-            driver-pin-num = <19>;
-            current-pin-num = <30>;
-            default-adc-trigger = "ADCTRIG_1";
-            default-adc-decim = <1>;
-            default-edge-trigger = "EdgeTrigger_up";
-            default-dead-time = <100 100>;
-            // default-modulation = "UpDwn";
-            default-modulation = "Lft_aligned";
-            default-phase-shift = <0>;
-			status = "okay";
-        };
+&leg1 {
+	default-modulation = "Lft_aligned";
+};
 
-        leg2: leg2{
-            leg-name = "LEG2";
-			pwms = <&pwmc 1 0>, <&pwmc 2 0>;
-            pwm-pin-num = <2 4>;
-            capa-pin-num = <56>;
-            driver-pin-num = <22>;
-            current-pin-num = <25>;
-            default-adc-trigger = "ADCTRIG_3";
-            default-adc-decim = <1>;
-            default-edge-trigger = "EdgeTrigger_up";
-            default-dead-time = <100 100>;
-            //default-modulation = "UpDwn";
-            default-modulation = "Lft_aligned";
-            default-phase-shift = <0>;
-			status = "okay";
-        };
+&leg2 {
+	default-modulation = "Lft_aligned";
+};
+
 ```
 
 ## Run the example
