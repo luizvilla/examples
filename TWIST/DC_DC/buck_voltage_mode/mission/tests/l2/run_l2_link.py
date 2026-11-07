@@ -93,7 +93,7 @@ def check(link, spec):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("out", nargs="?", type=pathlib.Path, default=MISSION / "out" / "l2_link")
+    parser.add_argument("out", nargs="?", type=pathlib.Path, default=MISSION / "records" / "l2-link")
     parser.add_argument("--board", help="USB serial number of the board")
     args = parser.parse_args(argv)
 

@@ -11,7 +11,7 @@ LOW1 voltage.
 
 Test case BUCK-STEP-01: start-up to 12 V at 1 A, then a load step to 2 A.
 
-Usage: tests/l1/run_l1.py [out-dir]     (default: out/l1)
+Usage: tests/l1/run_l1.py [out-dir]     (default: records/l1-buck-step-01)
 Needs a C++ compiler (CXX, default g++) and requirements.txt installed.
 """
 import ctypes
@@ -175,4 +175,4 @@ def main(out: pathlib.Path):
 
 
 if __name__ == "__main__":
-    sys.exit(main(pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else MISSION / "out" / "l1"))
+    sys.exit(main(pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else MISSION / "records" / "l1-buck-step-01"))

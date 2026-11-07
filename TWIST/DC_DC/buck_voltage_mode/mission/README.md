@@ -44,6 +44,8 @@ python -m ownstudio_lab.flash bin/manifest.json --mcumgr /path/to/mcumgr
 tests/l2/run_l2_link.py
 ```
 
+Test records (a JSON file for tools, a Markdown page for people) go to `records/<test>/`; OwnStudio's Home colours each requirement from the latest records. The template ignores `records/` in git.
+
 The link test checks that the board runs this folder's sources, that every data object is there with its type, and that writes work. It never sets the mode to power.
 
 ## Status (2026-11-07)

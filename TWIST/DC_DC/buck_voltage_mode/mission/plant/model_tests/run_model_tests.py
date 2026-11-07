@@ -7,7 +7,7 @@ a plant that disagrees with first principles would make every L1 verdict
 meaningless. Comparing the model with the real board on the bench is a
 separate, later step.
 
-Usage: plant/model_tests/run_model_tests.py [out-dir]   (default: out/model_tests)
+Usage: plant/model_tests/run_model_tests.py [out-dir]   (default: records/model-tests)
 """
 import pathlib
 import sys
@@ -82,4 +82,4 @@ def main(out):
 
 
 if __name__ == "__main__":
-    sys.exit(main(pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else MISSION / "out" / "model_tests"))
+    sys.exit(main(pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else MISSION / "records" / "model-tests"))
