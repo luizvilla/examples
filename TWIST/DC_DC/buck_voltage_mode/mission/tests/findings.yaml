@@ -11,3 +11,15 @@ findings:
     owner: Luiz
     status: open
     blocks: "Students solving the mission as specified"
+  - issue: https://github.com/luizvilla/Theia/issues/14
+    criteria: [BENCH-MOD-01.a5]
+    cause: "The board's V1 sensor reads 0.25 V low at 5 V (about +3 % gain, -0.4 V offset against the meter); the loop regulates on it, so LOW1 sits at 5.31 V. V2 is 2.3-3.1 V low, VHIGH 0.5 V low. Default calibration, board 1.4.3."
+    owner: Luiz
+    status: open
+    blocks: "REQ-VOUT judged on the board's own sensor; LOW2 readings"
+  - issue: https://github.com/luizvilla/Theia/issues/15
+    criteria: [BENCH-MOD-01.c5, BENCH-MOD-01.c8, BENCH-MOD-01.c12]
+    cause: "Supply current read with a clamp, inconsistent (12 V reading below the lossless model); the feeder current is not in the model."
+    owner: Luiz
+    status: open
+    blocks: "Checking the plant model's input current"
