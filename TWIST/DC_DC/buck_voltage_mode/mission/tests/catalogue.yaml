@@ -6,6 +6,10 @@
 #
 # status is the implementation state (implemented | partial | planned | blocked),
 # never a verdict: verdicts come from the records. target: pc | simulator | board.
+# blocks: the blocks of mission.yaml the test exercises; Home's Verification layer
+# colours each block from them. board_blocks: exercised only when the test runs on
+# the board (the simulator's sensors and drivers are ideal). The auxiliary power
+# supply has no test yet.
 # A test that verifies a requirement names it here, and requirements.yaml lists
 # the test in verified_by; tests/test_catalogue.py checks both directions.
 
@@ -27,14 +31,16 @@ tabs:
 
 tests:
   # Plant model against hand calculations (plant/model_tests/run_model_tests.py)
-  - {id: PM-01a, tab: model, level: model, target: simulator, status: implemented, title: "Mean LOW1 voltage at duty 0.3", criterion: "within 2 % of duty × V_HIGH"}
-  - {id: PM-01b, tab: model, level: model, target: simulator, status: implemented, title: "Mean LOW1 voltage at duty 0.5", criterion: "within 2 % of duty × V_HIGH"}
-  - {id: PM-02,  tab: model, level: model, target: simulator, status: implemented, title: "Inductor current ripple, peak to peak", criterion: "within 10 % of the analytic ripple"}
-  - {id: PM-03,  tab: model, level: model, target: simulator, status: implemented, title: "LOW1 voltage ripple, peak to peak", criterion: "within 15 % of the analytic ripple"}
-  - {id: PM-04,  tab: model, level: model, target: simulator, status: implemented, title: "Output filter resonance from start-up ringing", criterion: "within 5 % of 1/(2π√(LC))"}
+  - {id: PM-01a, blocks: [power], tab: model, level: model, target: simulator, status: implemented, title: "Mean LOW1 voltage at duty 0.3", criterion: "within 2 % of duty × V_HIGH"}
+  - {id: PM-01b, blocks: [power], tab: model, level: model, target: simulator, status: implemented, title: "Mean LOW1 voltage at duty 0.5", criterion: "within 2 % of duty × V_HIGH"}
+  - {id: PM-02, blocks: [power],  tab: model, level: model, target: simulator, status: implemented, title: "Inductor current ripple, peak to peak", criterion: "within 10 % of the analytic ripple"}
+  - {id: PM-03, blocks: [power],  tab: model, level: model, target: simulator, status: implemented, title: "LOW1 voltage ripple, peak to peak", criterion: "within 15 % of the analytic ripple"}
+  - {id: PM-04, blocks: [power],  tab: model, level: model, target: simulator, status: implemented, title: "Output filter resonance from start-up ringing", criterion: "within 5 % of 1/(2π√(LC))"}
 
   # Plant model against the board (tests/bench/bench_mod_01.py, operator at the bench)
   - id: BENCH-MOD-01
+    blocks: [power]
+    board_blocks: [measurement]
     tab: model
     level: bench
     target: board
@@ -44,39 +50,41 @@ tests:
     notes: "Needs an operator: supply limited to 1 A, two 33 Ω loads, a multimeter. Sensor readings against the meter are information only."
 
   # Control law alone (tests/run_l0.sh)
-  - {id: L0-CTL-01,  tab: control, level: L0, target: pc, status: implemented, title: "Zero error from reset gives duty 0", criterion: "duty = 0"}
-  - {id: L0-CTL-02,  tab: control, level: L0, target: pc, status: implemented, title: "First step equals Kp·e·(1 + Ts/Ti)", criterion: "within 1e-6"}
-  - {id: L0-CTL-03a, tab: control, level: L0, target: pc, status: implemented, title: "Duty never decreases under constant positive error", criterion: "monotonic"}
-  - {id: L0-CTL-03b, tab: control, level: L0, target: pc, status: implemented, title: "Duty never exceeds 1", criterion: "≤ 1"}
-  - {id: L0-CTL-03c, tab: control, level: L0, target: pc, status: implemented, title: "Duty saturates at the predicted step", criterion: "within one step"}
-  - {id: L0-CTL-04,  tab: control, level: L0, target: pc, status: implemented, title: "No windup: one negative-error step leaves saturation", criterion: "within 1e-4 of 1 − Kp·(e + 1 + Ts/Ti)"}
-  - {id: L0-CTL-05,  tab: control, level: L0, target: pc, status: implemented, title: "Large negative error gives duty 0", criterion: "duty = 0"}
-  - {id: L0-CTL-06,  tab: control, level: L0, target: pc, status: implemented, title: "After reset the first step equals L0-CTL-02", criterion: "within 1e-6"}
+  - {id: L0-CTL-01, blocks: [controller],  tab: control, level: L0, target: pc, status: implemented, title: "Zero error from reset gives duty 0", criterion: "duty = 0"}
+  - {id: L0-CTL-02, blocks: [controller],  tab: control, level: L0, target: pc, status: implemented, title: "First step equals Kp·e·(1 + Ts/Ti)", criterion: "within 1e-6"}
+  - {id: L0-CTL-03a, blocks: [controller], tab: control, level: L0, target: pc, status: implemented, title: "Duty never decreases under constant positive error", criterion: "monotonic"}
+  - {id: L0-CTL-03b, blocks: [controller], tab: control, level: L0, target: pc, status: implemented, title: "Duty never exceeds 1", criterion: "≤ 1"}
+  - {id: L0-CTL-03c, blocks: [controller], tab: control, level: L0, target: pc, status: implemented, title: "Duty saturates at the predicted step", criterion: "within one step"}
+  - {id: L0-CTL-04, blocks: [controller],  tab: control, level: L0, target: pc, status: implemented, title: "No windup: one negative-error step leaves saturation", criterion: "within 1e-4 of 1 − Kp·(e + 1 + Ts/Ti)"}
+  - {id: L0-CTL-05, blocks: [controller],  tab: control, level: L0, target: pc, status: implemented, title: "Large negative error gives duty 0", criterion: "duty = 0"}
+  - {id: L0-CTL-06, blocks: [controller],  tab: control, level: L0, target: pc, status: implemented, title: "After reset the first step equals L0-CTL-02", criterion: "within 1e-6"}
 
   # Closed loop: tests/procedures/step_response.py on the simulator
-  - {id: BUCK-STEP-01a, tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-VOUT], title: "Mean LOW1 voltage before the 1 A → 2 A load step", criterion: "within 2 % of 12 V"}
-  - {id: BUCK-STEP-01b, tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-UNDERSHOOT], title: "Lowest LOW1 voltage after the load step", criterion: "at least 95 % of 12 V"}
-  - {id: BUCK-STEP-01c, tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-SETTLING], title: "Settling back into ±2 % after the load step", criterion: "at most 10 ms, and settled by the end"}
-  - {id: BUCK-STEP-01d, tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-RIPPLE], title: "LOW1 ripple, peak to peak, before the step", criterion: "at most 100 mV"}
+  - {id: BUCK-STEP-01a, blocks: [power, controller], tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-VOUT], title: "Mean LOW1 voltage before the 1 A → 2 A load step", criterion: "within 2 % of 12 V"}
+  - {id: BUCK-STEP-01b, blocks: [power, controller], tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-UNDERSHOOT], title: "Lowest LOW1 voltage after the load step", criterion: "at least 95 % of 12 V"}
+  - {id: BUCK-STEP-01c, blocks: [power, controller], tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-SETTLING], title: "Settling back into ±2 % after the load step", criterion: "at most 10 ms, and settled by the end"}
+  - {id: BUCK-STEP-01d, blocks: [power, controller], tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-RIPPLE], title: "LOW1 ripple, peak to peak, before the step", criterion: "at most 100 mV"}
   # Reference step: tests/procedures/reference_step.py, the same procedure on both targets
-  - {id: BUCK-REF-01a, tab: loop, level: [L1, L2], target: [simulator, board], status: implemented, title: "Steady LOW1 at a 10 V reference", criterion: "within 2 %"}
-  - {id: BUCK-REF-01b, tab: loop, level: [L1, L2], target: [simulator, board], status: implemented, title: "Steady LOW1 at a 12 V reference", criterion: "within 2 %"}
-  - {id: BUCK-REF-01c, tab: loop, level: [L1, L2], target: [simulator, board], status: implemented, title: "Settling after the 10 V → 12 V step", criterion: "information only (from the waveform: the firmware scope on the board)"}
+  - {id: BUCK-REF-01a, blocks: [power, controller], board_blocks: [measurement, driver], tab: loop, level: [L1, L2], target: [simulator, board], status: implemented, title: "Steady LOW1 at a 10 V reference", criterion: "within 2 %"}
+  - {id: BUCK-REF-01b, blocks: [power, controller], board_blocks: [measurement, driver], tab: loop, level: [L1, L2], target: [simulator, board], status: implemented, title: "Steady LOW1 at a 12 V reference", criterion: "within 2 %"}
+  - {id: BUCK-REF-01c, blocks: [power, controller], board_blocks: [measurement, driver], tab: loop, level: [L1, L2], target: [simulator, board], status: implemented, title: "Settling after the 10 V → 12 V step", criterion: "information only (from the waveform: the firmware scope on the board)"}
   - id: BUCK-STEP-02
+    blocks: [power, controller]
+    board_blocks: [measurement, driver]
     tab: loop
     level: L2
     target: board
     status: blocked
-    blocked_by: "a switched load on the bench, and the firmware scope for the waveform (step 4)"
+    blocked_by: "a switched load on the bench (the waveform comes from the firmware scope since step 4)"
     title: "The 1 A → 2 A load step on the board"
     criterion: "the BUCK-STEP-01 criteria, measured on the board"
 
   # Board link (tests/l2/run_l2_link.py)
-  - {id: LINK-01, tab: link, level: L2, target: board, status: implemented, title: "Board runs this mission's sources", criterion: "source hash equal"}
-  - {id: LINK-02, tab: link, level: L2, target: board, status: implemented, title: "Every data object is on the board with its type", criterion: "missing or mistyped = 0"}
-  - {id: LINK-03, tab: link, level: L2, target: board, status: implemented, title: "No two root objects share a name", criterion: "duplicates = 0"}
-  - {id: LINK-04, tab: link, level: L2, target: board, status: implemented, title: "A written reference reads back", criterion: "|readback − written| < 0.01 V"}
-  - {id: LINK-05, tab: link, level: L2, target: board, status: implemented, title: "The converter is idle", criterion: "Mode = 0 (PWM off)"}
-  - {id: LINK-06, tab: link, level: L2, target: board, status: implemented, title: "A read-only object refuses writes", criterion: "answer is :A3 Forbidden"}
-  - {id: LINK-07a, tab: link, level: L2, target: board, status: implemented, title: "The scope triggers on a write to Converter, at its stated sample", criterion: "capture ready; reference changes at sample rPretrigger and nowhere else"}
-  - {id: LINK-07b, tab: link, level: L2, target: board, status: implemented, title: "The scope records what the board measures (HIGH voltage)", criterion: "mean of the capture within 0.5 V of Measurements/rVHigh_V"}
+  - {id: LINK-01, blocks: [controller], tab: link, level: L2, target: board, status: implemented, title: "Board runs this mission's sources", criterion: "source hash equal"}
+  - {id: LINK-02, blocks: [controller], tab: link, level: L2, target: board, status: implemented, title: "Every data object is on the board with its type", criterion: "missing or mistyped = 0"}
+  - {id: LINK-03, blocks: [controller], tab: link, level: L2, target: board, status: implemented, title: "No two root objects share a name", criterion: "duplicates = 0"}
+  - {id: LINK-04, blocks: [controller], tab: link, level: L2, target: board, status: implemented, title: "A written reference reads back", criterion: "|readback − written| < 0.01 V"}
+  - {id: LINK-05, blocks: [controller], tab: link, level: L2, target: board, status: implemented, title: "The converter is idle", criterion: "Mode = 0 (PWM off)"}
+  - {id: LINK-06, blocks: [controller], tab: link, level: L2, target: board, status: implemented, title: "A read-only object refuses writes", criterion: "answer is :A3 Forbidden"}
+  - {id: LINK-07a, blocks: [controller], tab: link, level: L2, target: board, status: implemented, title: "The scope triggers on a write to Converter, at its stated sample", criterion: "capture ready; reference changes at sample rPretrigger and nowhere else"}
+  - {id: LINK-07b, blocks: [measurement, controller], tab: link, level: L2, target: board, status: implemented, title: "The scope records what the board measures (HIGH voltage)", criterion: "mean of the capture within 0.5 V of Measurements/rVHigh_V"}
