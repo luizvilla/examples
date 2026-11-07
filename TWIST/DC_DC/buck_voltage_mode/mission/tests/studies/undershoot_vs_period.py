@@ -38,13 +38,19 @@ def run(period_s, kp, ki, electrolytic=True):
     s = {"applied": REF / V_IN, "command": REF / V_IN, "k": -1, "next": 0.0, "integral": REF / V_IN}
     mask = p.SwitchStateMask(b.graph.num_switches)
 
+    # PWM edges by step index, as tests/sim_harness.py (the duty moves in 0.5 % quanta).
+    dt = q["step_s"]
+    steps, dead_steps = int(round(pwm / dt)), int(round(dead / dt))
+    s.update({"on": 0})
+
     def switch_fn(t):
-        k = int(t // pwm)
+        k = int(np.floor(t / pwm + 1e-6))
         if k != s["k"]:
+            s["on"] = min(max(int(round(s["command"] * steps)), 0), steps)
             s["k"], s["applied"] = k, s["command"]
-        phase, d = t - k * pwm, s["applied"]
-        mask.set(hs, dead <= phase < d * pwm)
-        mask.set(ls, d * pwm + dead <= phase < pwm)
+        step = int(round((t - k * pwm) / dt))
+        mask.set(hs, dead_steps <= step < s["on"])
+        mask.set(ls, s["on"] + dead_steps <= step < steps)
         mask.set(st, t >= STEP_AT)
         return mask
 

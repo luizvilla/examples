@@ -81,6 +81,16 @@ class Harness:
         self.hs, self.ls, self.step_sw = b.switch_index_of("S_hs"), b.switch_index_of("S_ls"), b.switch_index_of("S_step")
         self.mask = p.SwitchStateMask(b.graph.num_switches)
         self.period, self.dead = 1.0 / q["switching_freq_Hz"], q["dead_time_s"]
+        # The fixed simulation step quantizes the PWM edges: 200 steps per period, so the duty
+        # moves in 0.5 % quanta (the Twist's HRTIM has 184 ps). Edges are placed by step index,
+        # never by comparing times, so the result does not depend on how the run is segmented.
+        # Carrying the rounding to the next period (sigma-delta) makes the mean duty exact but
+        # adds about 30 mV of low-frequency ripple, so it is not done: see the plant model's
+        # limitations in the step 4 report.
+        self.dt = q["step_s"]
+        self.steps = int(round(self.period / self.dt))
+        self.dead_steps = int(round(self.dead / self.dt))
+        self.on_steps = 0
         self.store_every = store_every
 
         self.mode, self.reference, self.load_step = 0, DEFAULT_REFERENCE_V, False
@@ -135,11 +145,12 @@ class Harness:
         # times carry different rounding, and t // period would then shift the edges by one step.
         k = int(math.floor(t / self.period + 1e-6))
         if k != self.pwm_k:                     # the duty takes effect at the next PWM period
+            self.on_steps = min(max(int(round(self.command * self.steps)), 0), self.steps)
             self.pwm_k, self.applied = k, self.command
         on = self.mode == 1
-        phase, d = max(0.0, t - k * self.period), self.applied
-        self.mask.set(self.hs, on and self.dead <= phase < d * self.period)
-        self.mask.set(self.ls, on and d * self.period + self.dead <= phase < self.period)
+        step = int(round((t - k * self.period) / self.dt))
+        self.mask.set(self.hs, on and self.dead_steps <= step < self.on_steps)
+        self.mask.set(self.ls, on and self.on_steps + self.dead_steps <= step < self.steps)
         self.mask.set(self.step_sw, self.load_step)
         return self.mask
 
