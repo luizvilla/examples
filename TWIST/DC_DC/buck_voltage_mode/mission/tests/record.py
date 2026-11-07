@@ -45,10 +45,12 @@ def write(out: pathlib.Path, procedure: str, level: str, target: str, cases: lis
              f"- Level {level}, target {target}, {record['date']}",
              f"- Mission commit `{record['mission']['commit'][:12]}`" + (" (dirty: not reproducible)" if record["mission"]["dirty"] else ""),
              "- Versions: " + ", ".join(f"{k} {v}" for k, v in record["versions"].items()), "",
-             "| Case | Check | Measured | Expected | Criterion | Verdict |", "| --- | --- | --- | --- | --- | --- |"]
+             "| Case | Requirement | Check | Measured | Expected | Criterion | Verdict |",
+             "| --- | --- | --- | --- | --- | --- | --- |"]
     for c in cases:
         unit = c.get("unit", "")
-        lines.append(f"| {c['id']} | {c['title']} | {c['measured']:.4g} {unit} | {c['expected']:.4g} {unit} | {c['criterion']} | {'PASS' if c['passed'] else 'FAIL'} |")
+        lines.append(f"| {c['id']} | {c.get('requirement', '—')} | {c['title']} | {c['measured']:.4g} {unit} | "
+                     f"{c['expected']:.4g} {unit} | {c['criterion']} | {'PASS' if c['passed'] else 'FAIL'} |")
     lines += ["", "Input hashes (SHA-256):", ""] + [f"- `{k}`: `{v[:16]}…`" for k, v in record["inputs"].items()]
     (out / "record.md").write_text("\n".join(lines) + "\n")
     return passed

@@ -75,8 +75,9 @@ static float meas_data;
 /* Duty cycle applied to both legs (data object, read-only) */
 float32_t duty_cycle = 0.3;
 
-/* Voltage reference (data object, writable) */
-float32_t voltage_reference = 15;
+/* Voltage reference (data object, writable). 12 V is the mission's
+ * requirement REQ-VOUT; the original example started at 15 V. */
+float32_t voltage_reference = 12;
 
 /* Control law period, in seconds (the PI itself lives in control.cpp) */
 static float32_t Ts = control_task_period * 1e-6;

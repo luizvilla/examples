@@ -1,0 +1,50 @@
+# Requirements of the buck voltage-mode mission.
+#
+# Each requirement is a number with a tolerance and the conditions under
+# which it is checked, and names the test case(s) that verify it. The
+# test runners read their pass criteria from this file, so a requirement
+# changed here changes the verdict, nowhere else.
+
+conditions: &nominal
+  port_high_V: 40.0
+  reference_V: 12.0
+  load_A: 1.0
+
+requirements:
+  - id: REQ-VOUT
+    title: Output voltage
+    statement: LOW1 holds 12 V within 2 % in steady state.
+    port: LOW1
+    value: 12.0
+    unit: V
+    tolerance_relative: 0.02
+    conditions: *nominal
+    verified_by: [BUCK-STEP-01a]
+
+  - id: REQ-UNDERSHOOT
+    title: Undershoot on a load step
+    statement: When the load steps from 1 A to 2 A, LOW1 never falls more than 5 % below 12 V.
+    port: LOW1
+    value: 0.05
+    unit: fraction of the reference
+    conditions: {<<: *nominal, load_step_A: [1.0, 2.0]}
+    verified_by: [BUCK-STEP-01b]
+
+  - id: REQ-SETTLING
+    title: Settling after a load step
+    statement: After the 1 A to 2 A load step, LOW1 is back within 2 % of 12 V within 10 ms and stays there.
+    port: LOW1
+    value: 0.010
+    unit: s
+    band_relative: 0.02
+    conditions: {<<: *nominal, load_step_A: [1.0, 2.0]}
+    verified_by: [BUCK-STEP-01c]
+
+  - id: REQ-RIPPLE
+    title: Output ripple
+    statement: The peak-to-peak switching ripple on LOW1 stays below 100 mV at 1 A.
+    port: LOW1
+    value: 0.100
+    unit: V
+    conditions: *nominal
+    verified_by: [BUCK-STEP-01d]

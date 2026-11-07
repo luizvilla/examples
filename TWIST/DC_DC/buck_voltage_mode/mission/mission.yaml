@@ -1,0 +1,71 @@
+# Mission: make the Twist hold 12 V under a load step.
+#
+# OwnStudio reads this file to open the mission: which board it needs, how
+# Home draws the converter, the safety envelope, the state the firmware
+# starts in, and the steps the student follows.
+
+id: twist-buck-hold-12v
+title: Make the Twist hold 12 V under a load step
+summary: >
+  Size the output filter of a buck converter, compare it with the real
+  Twist, then make the PI controller hold 12 V when the load doubles,
+  first in simulation, then on the board.
+
+board:
+  pack: twist
+  version: "1.4.2"          # shield version the firmware is built for (firmware/app.ini)
+
+# The five converter blocks, as Home draws them for this board.
+blocks:
+  power:       {title: Power,       summary: "Two half-bridge legs, 33 uH and 33 uF per leg, fuses, WAGO connectors, heatsink", opens: plant/params.yaml}
+  measurement: {title: Measurement, summary: "Isolated Hall current sensors, voltage dividers, isolation amplifier on the high side", opens: firmware/data_objects.h}
+  controller:  {title: Controller,  summary: "Spin board (STM32G4): ADCs, HRTIM PWM, ThingSet over USB", opens: firmware/control.cpp}
+  driver:      {title: Driver,      summary: "Gate drivers of the two legs", opens: null}
+  aps:         {title: Auxiliary power supply, summary: "The feeder: on-board 6 V supply for the other blocks", opens: null}
+
+# Power ports used by this mission. High/low is a property, not the name.
+ports:
+  HIGH: {side: high, kind: DC, direction: in,  connect: "lab power supply, 20 to 60 V"}
+  LOW1: {side: low,  kind: DC, direction: out, connect: "load resistor or electronic load"}
+  LOW2: {side: low,  kind: DC, direction: out, connect: "not used (same duty as LOW1)"}
+
+# Safety envelope of the mission: at or below the board ratings. HIGH is
+# capped at 60 V, the safe-to-touch extra-low-voltage limit, although the
+# board is rated higher (teaching profile, indicative, not certification).
+envelope:
+  HIGH: {v_max_V: 60.0, i_max_A: 8.0}
+  LOW1: {v_max_V: 20.0, i_max_A: 8.0}
+  LOW2: {v_max_V: 20.0, i_max_A: 8.0}
+
+# Data objects written when the mission starts (names from data_objects.yaml).
+starting_state:
+  Mode: 0
+  wVoltageRef_V: 12.0
+
+requirements: requirements.yaml
+
+steps:
+  - id: specify
+    workbench: home
+    title: Read the requirements
+    detail: Four requirements on LOW1, each with its number and the test case that checks it.
+  - id: size
+    workbench: design
+    title: Size the output filter
+    detail: Use design/sizing.py to find the smallest L and C that meet REQ-RIPPLE, then compare with the Twist's 33 uH and 33 uF.
+    opens: design/sizing.py
+  - id: simulate
+    workbench: lab
+    title: Run the load step in simulation
+    detail: Run tests/l1/run_l1.py. With the example's PI, REQ-UNDERSHOOT fails. Find out why.
+    target: simulator
+  - id: improve
+    workbench: code
+    title: Improve the control law
+    detail: Change control.cpp until the L1 test passes. Keep it free of hardware calls.
+    opens: firmware/control.cpp
+  - id: bench
+    workbench: lab
+    title: Run the same test on the board
+    detail: Flash the firmware and repeat the load step on the Twist. Compare with the simulation.
+    target: board
