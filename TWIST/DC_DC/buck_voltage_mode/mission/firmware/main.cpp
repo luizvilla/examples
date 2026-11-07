@@ -40,6 +40,10 @@
  * on the board's second USB serial port (see app.overlay). */
 #include "data_objects.h"
 
+/*--------------Firmware scope--------------------------------- */
+/* Records the critical task's variables for the computer (scope.cpp). */
+#include "scope.h"
+
 /*--------------SETUP FUNCTIONS DECLARATION------------------- */
 /* Setups the hardware and software of the system */
 void setup_routine();
@@ -116,6 +120,8 @@ void setup_routine()
 
     control_init(Ts);
 
+    scope_init(Ts);
+
     /* Then declare tasks */
     uint32_t app_task_number = task.createBackground(loop_application_task);
     task.createCritical(loop_critical_task, 100);
@@ -161,6 +167,7 @@ void loop_application_task()
  *  - It retrieves sensors values
  *  - It runs the PID controller
  *  - It update the PWM signals
+ *  - It records one sample for the firmware scope
  */
 void loop_critical_task()
 {
@@ -205,6 +212,7 @@ void loop_critical_task()
         }
     }
 
+    scope_sample();
 }
 
 /**

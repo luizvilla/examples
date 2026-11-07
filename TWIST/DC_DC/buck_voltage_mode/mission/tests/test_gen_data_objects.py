@@ -53,6 +53,35 @@ class Strings(unittest.TestCase):
             gen.validate(table(dict(VOLT, size=4)))
 
 
+class FloatArrays(unittest.TestCase):
+    DATA = {"name": "rData", "id": 0x87, "type": "float_array", "size": 64, "decimals": 3, "variable": "data"}
+
+    def test_array_is_wrapped_and_declared_with_its_size(self):
+        header, body = gen.render(table(self.DATA))
+        self.assertIn("THINGSET_DEFINE_FLOAT_ARRAY(data_ts, 3, data, 64);", body)
+        self.assertIn('THINGSET_ADD_ITEM_ARRAY(ID_MEASUREMENTS, ID_MEASUREMENTS_DATA, "rData", &data_ts, THINGSET_ANY_R, SUBSET_SER);', body)
+        self.assertIn("extern float data[64];", header)
+
+    def test_array_needs_a_size(self):
+        with self.assertRaises(gen.SpecError):
+            gen.validate(table({k: v for k, v in self.DATA.items() if k != "size"}))
+
+
+class Callbacks(unittest.TestCase):
+    def test_group_callback_is_declared_and_passed(self):
+        data = table(VOLT)
+        data["groups"][0]["callback"] = "on_measurements"
+        _, body = gen.render(data)
+        self.assertIn("void on_measurements(enum thingset_callback_reason reason);", body)
+        self.assertIn('THINGSET_ADD_GROUP(ID_ROOT, ID_MEASUREMENTS, "Measurements", on_measurements);', body)
+
+    def test_callback_must_be_a_function_name(self):
+        data = table(VOLT)
+        data["groups"][0]["callback"] = "on measurements()"
+        with self.assertRaises(gen.SpecError):
+            gen.validate(data)
+
+
 class Validation(unittest.TestCase):
     def rejects(self, data, words):
         with self.assertRaises(gen.SpecError) as ctx:

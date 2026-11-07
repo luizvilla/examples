@@ -32,6 +32,23 @@ groups:
       - {name: Mode,          id: 0x61, type: uint8,              variable: mode,              description: "0 idle (PWM off), 1 power (PWM on, PI running)"}
       - {name: wVoltageRef_V, id: 0x62, type: float, decimals: 2, unit: V, variable: voltage_reference, description: "Output voltage reference of the PI"}
 
+  # The firmware scope (firmware/scope.cpp): the five channels below, recorded
+  # every control period into a 1024-sample ring. Arm it, then write to
+  # Converter: it keeps 20 % of the window from before that write. Read the
+  # capture 64 values at a time: write wChunk, then read rData.
+  - name: Scope
+    id: 0x08
+    callback: scope_thingset_callback
+    objects:
+      - {name: wArm,        id: 0x80, type: uint8,  variable: scope_arm,      description: "Write 1 to record from the next write to Converter, 2 to record now; reads back 0"}
+      - {name: rState,      id: 0x81, type: uint8,  variable: scope_state,    description: "0 idle, 1 armed, 2 recording, 3 ready to read"}
+      - {name: rLength,     id: 0x82, type: uint16, variable: scope_length,   description: "Samples per channel"}
+      - {name: rPretrigger, id: 0x83, type: uint16, variable: scope_pretrigger, description: "Samples recorded before the trigger"}
+      - {name: rPeriod_s,   id: 0x84, type: float, decimals: 6, unit: s, variable: scope_period, description: "Time between two samples"}
+      - {name: rChannels,   id: 0x85, type: string, size: 64, variable: scope_channels, description: "Recorded data objects, comma-separated, in data order"}
+      - {name: wChunk,      id: 0x86, type: uint16, variable: scope_chunk,    description: "Which 64 values rData holds: channel after channel, oldest sample first"}
+      - {name: rData,       id: 0x87, type: float_array, size: 64, decimals: 3, variable: scope_data, description: "64 recorded values, selected by wChunk"}
+
   # Build identity: which sources this firmware was built from. Written by
   # tools/build_identity.py at build time; "unknown" when built without it.
   - name: Build

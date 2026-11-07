@@ -78,3 +78,5 @@ tests:
   - {id: LINK-04, tab: link, level: L2, target: board, status: implemented, title: "A written reference reads back", criterion: "|readback − written| < 0.01 V"}
   - {id: LINK-05, tab: link, level: L2, target: board, status: implemented, title: "The converter is idle", criterion: "Mode = 0 (PWM off)"}
   - {id: LINK-06, tab: link, level: L2, target: board, status: implemented, title: "A read-only object refuses writes", criterion: "answer is :A3 Forbidden"}
+  - {id: LINK-07a, tab: link, level: L2, target: board, status: implemented, title: "The scope triggers on a write to Converter, at its stated sample", criterion: "capture ready; reference changes at sample rPretrigger and nowhere else"}
+  - {id: LINK-07b, tab: link, level: L2, target: board, status: implemented, title: "The scope records what the board measures (HIGH voltage)", criterion: "mean of the capture within 0.5 V of Measurements/rVHigh_V"}

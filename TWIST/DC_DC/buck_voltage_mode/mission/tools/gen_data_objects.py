@@ -30,7 +30,9 @@ TYPES = {
     "uint32": ("uint32_t", "UINT32", False),
     "int32": ("int32_t", "INT32", False),
     "string": ("char", "STRING", False),  # a char array of `size` bytes, end NUL included
+    "float_array": ("float", "ARRAY", True),  # a float array of `size` elements
 }
+SIZED = {"string": 2, "float_array": 1}   # types that take `size`, and its minimum
 
 BANNER = (
     "/*\n"
@@ -46,7 +48,7 @@ class SpecError(Exception):
     pass
 
 
-GROUP_KEYS = {"name", "id", "objects"}
+GROUP_KEYS = {"name", "id", "objects", "callback"}
 
 # Objects OwnTech Core and the ThingSet Zephyr SDK already put in every
 # firmware (Core: zephyr/modules/owntech_communication/zephyr/src/data_objects.h;
@@ -91,6 +93,8 @@ def validate(spec):
         for key in ("name", "id", "objects"):
             if key not in group:
                 raise SpecError(f"group {group.get('name', '?')}: missing '{key}'")
+        if "callback" in group and not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", str(group["callback"])):
+            raise SpecError(f"group {group['name']}: callback must be a C function name")
         if group["name"] in RESERVED_NAMES:
             raise SpecError(f"group {group['name']}: the name is already used by OwnTech Core or ThingSet")
         entries = [(group["id"], f"group {group['name']}")]
@@ -107,11 +111,13 @@ def validate(spec):
                 raise SpecError(f"{where}: unknown type '{obj['type']}' (use {', '.join(TYPES)})")
             if TYPES[obj["type"]][2] and "decimals" not in obj:
                 raise SpecError(f"{where}: a float needs 'decimals'")
-            if obj["type"] == "string":
-                if not isinstance(obj.get("size"), int) or obj["size"] < 2:
-                    raise SpecError(f"{where}: a string needs 'size', its buffer length in bytes (2 or more)")
+            if obj["type"] in SIZED:
+                least = SIZED[obj["type"]]
+                if not isinstance(obj.get("size"), int) or obj["size"] < least:
+                    what = "its buffer length in bytes" if obj["type"] == "string" else "its number of elements"
+                    raise SpecError(f"{where}: a {obj['type']} needs 'size', {what} ({least} or more)")
             elif "size" in obj:
-                raise SpecError(f"{where}: only a string takes 'size'")
+                raise SpecError(f"{where}: only a string or a float_array takes 'size'")
             unit = obj.get("unit")
             if unit is not None and not obj["name"].endswith("_" + str(unit)):
                 raise SpecError(f"{where}: the name must end with _{unit} to match its unit")
@@ -147,11 +153,23 @@ def render(spec):
         gmacro = "ID_" + macro_name(group["name"])
         h.append(f"/* {group['name']} */")
         h.append(f"#define {gmacro} 0x{group['id']:02X}")
-        cpp.append(f'THINGSET_ADD_GROUP(ID_ROOT, {gmacro}, "{group["name"]}", THINGSET_NO_CALLBACK);')
+        callback = group.get("callback")
+        if callback:
+            cpp.append(f"/* Called by ThingSet before a read and after a write of {group['name']} (defined in the firmware). */")
+            cpp.append(f"void {callback}(enum thingset_callback_reason reason);")
+        cpp.append(f'THINGSET_ADD_GROUP(ID_ROOT, {gmacro}, "{group["name"]}", {callback or "THINGSET_NO_CALLBACK"});')
         for obj in group["objects"]:
             omacro = f"{gmacro}_{macro_name(obj['name'])}"
             ctype, suffix, has_decimals = TYPES[obj["type"]]
             h.append(f"#define {omacro} 0x{obj['id']:02X}")
+            if obj["type"] == "float_array":
+                if obj.get("description"):
+                    cpp.append(f"/* {obj['description']} */")
+                wrapper = f"{obj['variable']}_ts"
+                cpp.append(f"THINGSET_DEFINE_FLOAT_ARRAY({wrapper}, {obj['decimals']}, {obj['variable']}, {obj['size']});")
+                cpp.append(f'THINGSET_ADD_ITEM_ARRAY({gmacro}, {omacro}, "{obj["name"]}", &{wrapper}, '
+                           f"{access_of(obj['name'])}, SUBSET_{subset});")
+                continue
             if obj["type"] == "string":
                 args = [gmacro, omacro, f'"{obj["name"]}"', obj["variable"], str(obj["size"])]
             else:
@@ -167,7 +185,7 @@ def render(spec):
     h.append("/* Variables exposed above; defined in main.cpp (Build: build_identity.cpp). */")
     for group in spec["groups"]:
         for obj in group["objects"]:
-            array = f"[{obj['size']}]" if obj["type"] == "string" else ""
+            array = f"[{obj['size']}]" if obj["type"] in SIZED else ""
             h.append(f"extern {TYPES[obj['type']][0]} {obj['variable']}{array};")
     cpp.append("#endif /* CONFIG_THINGSET */")
     return "\n".join(h) + "\n", "\n".join(cpp).rstrip("\n") + "\n"
