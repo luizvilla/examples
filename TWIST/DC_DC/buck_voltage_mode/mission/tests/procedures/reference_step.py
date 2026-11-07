@@ -87,16 +87,17 @@ def run(target, ctx):
     target.update("Converter", {"Mode": 0})
     wave = target.capture()
 
-    cases = []
-    for letter, level, mean in zip("ab", LEVELS_V, levels):
-        ctx.log(f"reference {level:g} V: LOW1 {mean:.3f} V")
-        cases.append({"id": f"BUCK-REF-01{letter}", "title": f"Steady LOW1 at a {level:g} V reference",
-                      "measured": mean, "expected": level, "unit": "V", "criterion": f"within {TOLERANCE:.0%}",
-                      "passed": abs(mean - level) <= TOLERANCE * level})
-
     t = np.asarray(wave["t"]) - wave["t_trigger"]
     keep = t >= -BEFORE_S
     t, v, i = t[keep], np.asarray(wave["rV1Low_V"])[keep], np.asarray(wave["rI1Low_A"])[keep]
+
+    # window_s: the part of waveform.csv each level belongs to, for the requirement band in the Lab
+    cases = []
+    for letter, level, mean, window in zip("ab", LEVELS_V, levels, ([float(t[0]), 0.0], [0.0, float(t[-1])])):
+        ctx.log(f"reference {level:g} V: LOW1 {mean:.3f} V")
+        cases.append({"id": f"BUCK-REF-01{letter}", "title": f"Steady LOW1 at a {level:g} V reference",
+                      "measured": mean, "expected": level, "unit": "V", "criterion": f"within {TOLERANCE:.0%}",
+                      "passed": abs(mean - level) <= TOLERANCE * level, "window_s": window})
     settling = settling_time(t, v, LEVELS_V[1], TOLERANCE)
     title = "Settling into ±2 % after the 10 V → 12 V step"
     if settling is None:
