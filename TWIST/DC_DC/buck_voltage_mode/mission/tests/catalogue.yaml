@@ -53,11 +53,15 @@ tests:
   - {id: L0-CTL-05,  tab: control, level: L0, target: pc, status: implemented, title: "Large negative error gives duty 0", criterion: "duty = 0"}
   - {id: L0-CTL-06,  tab: control, level: L0, target: pc, status: implemented, title: "After reset the first step equals L0-CTL-02", criterion: "within 1e-6"}
 
-  # Closed loop (tests/l1/run_l1.py on the simulator)
+  # Closed loop: tests/procedures/step_response.py on the simulator
   - {id: BUCK-STEP-01a, tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-VOUT], title: "Mean LOW1 voltage before the 1 A → 2 A load step", criterion: "within 2 % of 12 V"}
   - {id: BUCK-STEP-01b, tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-UNDERSHOOT], title: "Lowest LOW1 voltage after the load step", criterion: "at least 95 % of 12 V"}
   - {id: BUCK-STEP-01c, tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-SETTLING], title: "Settling back into ±2 % after the load step", criterion: "at most 10 ms, and settled by the end"}
   - {id: BUCK-STEP-01d, tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-RIPPLE], title: "LOW1 ripple, peak to peak, before the step", criterion: "at most 100 mV"}
+  # Reference step: tests/procedures/reference_step.py, the same procedure on both targets
+  - {id: BUCK-REF-01a, tab: loop, level: [L1, L2], target: [simulator, board], status: implemented, title: "Steady LOW1 at a 10 V reference", criterion: "within 2 %"}
+  - {id: BUCK-REF-01b, tab: loop, level: [L1, L2], target: [simulator, board], status: implemented, title: "Steady LOW1 at a 12 V reference", criterion: "within 2 %"}
+  - {id: BUCK-REF-01c, tab: loop, level: [L1, L2], target: [simulator, board], status: partial, title: "Settling after the 10 V → 12 V step", criterion: "information only; on the board it needs the firmware scope"}
   - id: BUCK-STEP-02
     tab: loop
     level: L2

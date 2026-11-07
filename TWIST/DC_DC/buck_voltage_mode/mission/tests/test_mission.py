@@ -13,13 +13,17 @@ def load(name):
     return yaml.safe_load((MISSION / name).read_text())
 
 
-def l1_case_ids():
-    """Test case ids the L1 runner reports, read from its source without importing Pulsim."""
-    tree = ast.parse((MISSION / "tests" / "l1" / "run_l1.py").read_text())
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Assign) and any(getattr(t, "id", None) == "CASE_IDS" for t in node.targets):
-            return set(ast.literal_eval(node.value))
-    raise AssertionError("CASE_IDS not found in run_l1.py")
+def procedure_test_ids():
+    """Test ids the procedures in tests/procedures/ report (PROCEDURE["tests"]), read without importing Pulsim."""
+    ids = set()
+    for path in (MISSION / "tests" / "procedures").glob("*.py"):
+        tree = ast.parse(path.read_text())
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign) and any(getattr(t, "id", None) == "PROCEDURE" for t in node.targets):
+                for key, value in zip(node.value.keys, node.value.values):
+                    if getattr(key, "value", None) == "tests":
+                        ids |= set(ast.literal_eval(value))
+    return ids
 
 
 class Links(unittest.TestCase):
@@ -27,16 +31,16 @@ class Links(unittest.TestCase):
         self.mission = load("mission.yaml")
         self.requirements = load(self.mission["requirements"])["requirements"]
 
-    def test_every_requirement_is_verified_by_a_known_test_case(self):
-        known = l1_case_ids()
+    def test_every_requirement_is_verified_by_a_procedure(self):
+        known = procedure_test_ids()
         for r in self.requirements:
             with self.subTest(requirement=r["id"]):
                 self.assertTrue(r.get("verified_by"), "no test case: shown as a gap on the Verification layer")
                 self.assertLessEqual(set(r["verified_by"]), known)
 
-    def test_every_test_case_verifies_a_requirement(self):
-        linked = {c for r in self.requirements for c in r["verified_by"]}
-        self.assertEqual(l1_case_ids() - linked, set())
+    def test_every_procedure_test_is_catalogued(self):
+        catalogue = {t["id"] for t in load("tests/catalogue.yaml")["tests"]}
+        self.assertEqual(procedure_test_ids() - catalogue, set())
 
     def test_files_opened_by_blocks_and_steps_exist(self):
         paths = [b["opens"] for b in self.mission["blocks"].values() if b.get("opens")]

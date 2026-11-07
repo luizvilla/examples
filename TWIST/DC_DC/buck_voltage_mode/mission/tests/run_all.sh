@@ -23,7 +23,8 @@ step "mission files and generator tests" "$py" -m unittest discover -s tests -p 
 l0() { set -o pipefail; tests/run_l0.sh "$build/l0" | "$py" tests/l0/record_l0.py "$out/l0-control"; }
 step "L0: control law on the PC" l0
 step "plant model tests" "$py" plant/model_tests/run_model_tests.py "$out/model-tests"
-step "L1: control law closed loop on the plant model" "$py" tests/l1/run_l1.py "$out/l1-buck-step-01"
+step "L1: load step, control law closed loop on the plant model" "$py" -m ownstudio_lab.procedure . tests/procedures/step_response.py --target simulator --campaign "$out"
+step "L1: reference step on the simulator" "$py" -m ownstudio_lab.procedure . tests/procedures/reference_step.py --target simulator --campaign "$out"
 step "control center" "$py" -m ownstudio_lab.testing "$mission" --html "$mission/records/control-center.html"
 echo
 [ $status -eq 0 ] && echo "ALL PASSED" || echo "SOME CHECKS FAILED (see above and the campaign $out)"

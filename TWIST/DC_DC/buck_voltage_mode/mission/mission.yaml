@@ -57,7 +57,7 @@ steps:
   - id: simulate
     workbench: lab
     title: Run the load step in simulation
-    detail: Run tests/l1/run_l1.py. With the example's PI, REQ-UNDERSHOOT fails. Find out why.
+    detail: Run the BUCK-STEP-01 procedure on the simulator from the Lab (tests/procedures/step_response.py). With the example's PI, REQ-UNDERSHOOT fails. Find out why.
     target: simulator
   - id: improve
     workbench: code
