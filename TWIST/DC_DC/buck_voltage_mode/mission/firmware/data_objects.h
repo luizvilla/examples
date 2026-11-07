@@ -25,10 +25,10 @@
 #define ID_MEASUREMENTS_TEMP2 0x57
 #define ID_MEASUREMENTS_DUTY 0x5A
 
-/* Control */
-#define ID_CONTROL 0x06
-#define ID_CONTROL_MODE 0x61
-#define ID_CONTROL_VOLTAGE_REF 0x62
+/* Converter */
+#define ID_CONVERTER 0x06
+#define ID_CONVERTER_MODE 0x61
+#define ID_CONVERTER_VOLTAGE_REF 0x62
 
 /* Build */
 #define ID_BUILD 0x07

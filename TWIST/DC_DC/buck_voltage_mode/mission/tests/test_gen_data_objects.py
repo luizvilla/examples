@@ -59,6 +59,14 @@ class Validation(unittest.TestCase):
             gen.validate(data)
         self.assertIn(words, str(ctx.exception))
 
+    def test_group_name_used_by_core_is_refused(self):
+        data = table(VOLT)
+        data["groups"][0]["name"] = "Control"
+        self.rejects(data, "already used by OwnTech Core")
+
+    def test_id_reserved_by_core_is_refused(self):
+        self.rejects(table(dict(VOLT, id=0x8001)), "reserved")
+
     def test_duplicate_id(self):
         self.rejects(table(VOLT, dict(VOLT, name="rV2Low_V", variable="v2")), "already used")
 

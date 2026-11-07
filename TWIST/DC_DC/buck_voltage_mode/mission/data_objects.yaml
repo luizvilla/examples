@@ -26,7 +26,7 @@ groups:
       - {name: rTemp2_degC, id: 0x57, type: float, decimals: 1, unit: degC, variable: temp_2_value,  description: "Temperature of leg 2"}
       - {name: rDuty,       id: 0x5A, type: float, decimals: 4,             variable: duty_cycle,    description: "Duty cycle applied to both legs, 0 to 1"}
 
-  - name: Control
+  - name: Converter
     id: 0x06
     objects:
       - {name: Mode,          id: 0x61, type: uint8,              variable: mode,              description: "0 idle (PWM off), 1 power (PWM on, PI running)"}

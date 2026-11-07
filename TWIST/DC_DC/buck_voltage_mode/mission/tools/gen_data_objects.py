@@ -47,6 +47,18 @@ class SpecError(Exception):
 
 
 GROUP_KEYS = {"name", "id", "objects"}
+
+# Objects OwnTech Core and the ThingSet Zephyr SDK already put in every
+# firmware (Core: zephyr/modules/owntech_communication/zephyr/src/data_objects.h;
+# SDK: thingset-zephyr-sdk/include/thingset/sdk.h). Two root objects with the
+# same name make the second unreachable by path, so a mission must avoid them.
+RESERVED_NAMES = {
+    "Device", "Control", "Networking", "DFU", "LoRaWAN", "_Reporting", "mLive",
+    "mSummary", "mCAN", "pNodeID", "pNodeName", "xAuth", "t_s", "cNodeID",
+    "cMetadataURL", "_Ids", "_Paths", "_Metadata",
+}
+# (first, last) id ranges they use, ThingSet's own ids included.
+RESERVED_IDS = [(0x01, 0x04), (0x10, 0x3F), (0x200, 0x2FF), (0x8000, 0xFFFF)]
 OBJECT_KEYS = {"name", "id", "type", "decimals", "size", "unit", "variable", "description"}
 
 
@@ -79,6 +91,8 @@ def validate(spec):
         for key in ("name", "id", "objects"):
             if key not in group:
                 raise SpecError(f"group {group.get('name', '?')}: missing '{key}'")
+        if group["name"] in RESERVED_NAMES:
+            raise SpecError(f"group {group['name']}: the name is already used by OwnTech Core or ThingSet")
         entries = [(group["id"], f"group {group['name']}")]
         for obj in group["objects"]:
             where = f"{group['name']}/{obj.get('name', '?')}"
@@ -115,6 +129,8 @@ def validate(spec):
         for ident, where in entries:
             if not isinstance(ident, int) or ident <= 0:
                 raise SpecError(f"{where}: id must be a positive integer")
+            if any(first <= ident <= last for first, last in RESERVED_IDS):
+                raise SpecError(f"{where}: id 0x{ident:X} is reserved by OwnTech Core or ThingSet")
             if ident in ids:
                 raise SpecError(f"{where}: id 0x{ident:X} already used by {ids[ident]}")
             ids[ident] = where
