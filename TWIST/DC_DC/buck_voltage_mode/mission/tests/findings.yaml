@@ -1,0 +1,7 @@
+# Findings register: every issue opened from a test failure.
+#
+# A FAIL on a criterion listed in an open finding is shown as "failing (known)"
+# with its issue. A finding whose criteria all pass is shown as ready to close.
+# When the issue is closed, set status: closed and keep the entry.
+
+findings: []

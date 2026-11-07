@@ -45,7 +45,7 @@ python -m ownstudio_lab.flash bin/manifest.json --mcumgr /path/to/mcumgr
 tests/l2/run_l2_link.py
 ```
 
-Test records (a JSON file for tools, a Markdown page for people) go to `records/<test>/`; OwnStudio's Home colours each requirement from the latest records. The template ignores `records/` in git.
+Tests are registered as in Core2. `tests/catalogue.yaml` declares every test once; each run files test records (a JSON file for tools, a Markdown page for people) in a new campaign folder, `records/<date>_<commit>_<time>/`; `tests/findings.yaml` links failing criteria to issues. `tests/run_all.sh` ends by writing `records/control-center.html`, which shows where the validation stands; OwnStudio's Lab and Home show the same states. The template ignores `records/` in git. The shared tooling is OwnStudio's `ownstudio_lab.testing`, installed by `requirements.txt`.
 
 The link test checks that the board runs this folder's sources, that every data object is there with its type, and that writes work. It never sets the mode to power.
 

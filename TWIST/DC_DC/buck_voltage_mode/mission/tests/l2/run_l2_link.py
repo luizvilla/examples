@@ -93,7 +93,7 @@ def check(link, spec):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("out", nargs="?", type=pathlib.Path, default=MISSION / "records" / "l2-link")
+    parser.add_argument("out", nargs="?", type=pathlib.Path, help="output folder (default: <new campaign>/l2-link)")
     parser.add_argument("--board", help="USB serial number of the board")
     args = parser.parse_args(argv)
 
@@ -105,6 +105,7 @@ def main(argv=None):
         print("error: several boards are connected; choose one with --board", file=sys.stderr)
         return 2
     board = boards[0]
+    args.out = record.out_dir([str(args.out)] if args.out else [], "l2-link")
     device, link = find_thingset_port(board)
     if link is None:
         print(f"FAIL: board {board.serial_number} has no port answering ThingSet "

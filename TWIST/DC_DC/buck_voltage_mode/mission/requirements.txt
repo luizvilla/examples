@@ -1,3 +1,4 @@
 pulsim==2.0.0
 numpy==2.4.6
 PyYAML==6.0.3
+ownstudio-lab @ git+https://github.com/luizvilla/Theia@step-3/design-code-lab#subdirectory=app/python
