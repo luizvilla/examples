@@ -36,6 +36,23 @@ class Rendering(unittest.TestCase):
         self.assertIn("extern uint8_t mode;", header)
 
 
+class Strings(unittest.TestCase):
+    COMMIT = {"name": "rCommit", "id": 0x70, "type": "string", "size": 41, "variable": "commit"}
+
+    def test_string_is_passed_as_a_buffer_with_its_size(self):
+        header, body = gen.render(table(self.COMMIT))
+        self.assertIn('THINGSET_ADD_ITEM_STRING(ID_MEASUREMENTS, ID_MEASUREMENTS_COMMIT, "rCommit", commit, 41, THINGSET_ANY_R, SUBSET_SER);', body)
+        self.assertIn("extern char commit[41];", header)
+
+    def test_string_needs_a_size(self):
+        with self.assertRaises(gen.SpecError):
+            gen.validate(table({k: v for k, v in self.COMMIT.items() if k != "size"}))
+
+    def test_only_strings_take_a_size(self):
+        with self.assertRaises(gen.SpecError):
+            gen.validate(table(dict(VOLT, size=4)))
+
+
 class Validation(unittest.TestCase):
     def rejects(self, data, words):
         with self.assertRaises(gen.SpecError) as ctx:

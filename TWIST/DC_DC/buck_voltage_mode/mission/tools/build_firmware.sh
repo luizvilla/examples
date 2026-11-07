@@ -18,6 +18,8 @@ pio="${PIO:-$HOME/.platformio/penv/bin/pio}"
 # Replace the Core's application with the mission firmware.
 find "$core/src" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
 cp -r "$here/firmware/." "$core/src/"
+# Stamp the build identity (commit, dirty flag, source hash) into the copy.
+python3 "$here/tools/build_identity.py" "$core/src/build_identity.h"
 
 cd "$core"
 "$pio" run -e "$env"

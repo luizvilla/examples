@@ -30,7 +30,13 @@
 #define ID_CONTROL_MODE 0x61
 #define ID_CONTROL_VOLTAGE_REF 0x62
 
-/* Variables exposed above; defined in main.cpp. */
+/* Build */
+#define ID_BUILD 0x07
+#define ID_BUILD_COMMIT 0x70
+#define ID_BUILD_DIRTY 0x71
+#define ID_BUILD_SOURCE_HASH 0x72
+
+/* Variables exposed above; defined in main.cpp (Build: build_identity.cpp). */
 extern float V1_low_value;
 extern float V2_low_value;
 extern float V_high;
@@ -42,3 +48,6 @@ extern float temp_2_value;
 extern float duty_cycle;
 extern uint8_t mode;
 extern float voltage_reference;
+extern char build_commit[41];
+extern bool build_dirty;
+extern char build_source_hash[17];

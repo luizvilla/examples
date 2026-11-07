@@ -29,6 +29,7 @@ TYPES = {
     "uint16": ("uint16_t", "UINT16", False),
     "uint32": ("uint32_t", "UINT32", False),
     "int32": ("int32_t", "INT32", False),
+    "string": ("char", "STRING", False),  # a char array of `size` bytes, end NUL included
 }
 
 BANNER = (
@@ -46,7 +47,7 @@ class SpecError(Exception):
 
 
 GROUP_KEYS = {"name", "id", "objects"}
-OBJECT_KEYS = {"name", "id", "type", "decimals", "unit", "variable", "description"}
+OBJECT_KEYS = {"name", "id", "type", "decimals", "size", "unit", "variable", "description"}
 
 
 def macro_name(name):
@@ -92,6 +93,11 @@ def validate(spec):
                 raise SpecError(f"{where}: unknown type '{obj['type']}' (use {', '.join(TYPES)})")
             if TYPES[obj["type"]][2] and "decimals" not in obj:
                 raise SpecError(f"{where}: a float needs 'decimals'")
+            if obj["type"] == "string":
+                if not isinstance(obj.get("size"), int) or obj["size"] < 2:
+                    raise SpecError(f"{where}: a string needs 'size', its buffer length in bytes (2 or more)")
+            elif "size" in obj:
+                raise SpecError(f"{where}: only a string takes 'size'")
             unit = obj.get("unit")
             if unit is not None and not obj["name"].endswith("_" + str(unit)):
                 raise SpecError(f"{where}: the name must end with _{unit} to match its unit")
@@ -130,7 +136,10 @@ def render(spec):
             omacro = f"{gmacro}_{macro_name(obj['name'])}"
             ctype, suffix, has_decimals = TYPES[obj["type"]]
             h.append(f"#define {omacro} 0x{obj['id']:02X}")
-            args = [gmacro, omacro, f'"{obj["name"]}"', f"&{obj['variable']}"]
+            if obj["type"] == "string":
+                args = [gmacro, omacro, f'"{obj["name"]}"', obj["variable"], str(obj["size"])]
+            else:
+                args = [gmacro, omacro, f'"{obj["name"]}"', f"&{obj['variable']}"]
             if has_decimals:
                 args.append(str(obj["decimals"]))
             args += [access_of(obj["name"]), f"SUBSET_{subset}"]
@@ -139,10 +148,11 @@ def render(spec):
             cpp.append(f"THINGSET_ADD_ITEM_{suffix}({', '.join(args)});")
         h.append("")
         cpp.append("")
-    h.append("/* Variables exposed above; defined in main.cpp. */")
+    h.append("/* Variables exposed above; defined in main.cpp (Build: build_identity.cpp). */")
     for group in spec["groups"]:
         for obj in group["objects"]:
-            h.append(f"extern {TYPES[obj['type']][0]} {obj['variable']};")
+            array = f"[{obj['size']}]" if obj["type"] == "string" else ""
+            h.append(f"extern {TYPES[obj['type']][0]} {obj['variable']}{array};")
     cpp.append("#endif /* CONFIG_THINGSET */")
     return "\n".join(h) + "\n", "\n".join(cpp).rstrip("\n") + "\n"
 

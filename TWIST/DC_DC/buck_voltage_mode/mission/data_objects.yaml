@@ -31,3 +31,12 @@ groups:
     objects:
       - {name: Mode,          id: 0x61, type: uint8,              variable: mode,              description: "0 idle (PWM off), 1 power (PWM on, PI running)"}
       - {name: wVoltageRef_V, id: 0x62, type: float, decimals: 2, unit: V, variable: voltage_reference, description: "Output voltage reference of the PI"}
+
+  # Build identity: which sources this firmware was built from. Written by
+  # tools/build_identity.py at build time; "unknown" when built without it.
+  - name: Build
+    id: 0x07
+    objects:
+      - {name: rCommit,     id: 0x70, type: string, size: 41, variable: build_commit,      description: "Git commit of the mission folder"}
+      - {name: rDirty,      id: 0x71, type: bool,             variable: build_dirty,       description: "True if the sources differed from the commit"}
+      - {name: rSourceHash, id: 0x72, type: string, size: 17, variable: build_source_hash, description: "Hash of firmware/ and data_objects.yaml, 16 hex digits"}

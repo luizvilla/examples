@@ -38,4 +38,12 @@ THINGSET_ADD_ITEM_UINT8(ID_CONTROL, ID_CONTROL_MODE, "Mode", &mode, THINGSET_ANY
 /* Output voltage reference of the PI */
 THINGSET_ADD_ITEM_FLOAT(ID_CONTROL, ID_CONTROL_VOLTAGE_REF, "wVoltageRef_V", &voltage_reference, 2, THINGSET_ANY_RW, SUBSET_SER);
 
+THINGSET_ADD_GROUP(ID_ROOT, ID_BUILD, "Build", THINGSET_NO_CALLBACK);
+/* Git commit of the mission folder */
+THINGSET_ADD_ITEM_STRING(ID_BUILD, ID_BUILD_COMMIT, "rCommit", build_commit, 41, THINGSET_ANY_R, SUBSET_SER);
+/* True if the sources differed from the commit */
+THINGSET_ADD_ITEM_BOOL(ID_BUILD, ID_BUILD_DIRTY, "rDirty", &build_dirty, THINGSET_ANY_R, SUBSET_SER);
+/* Hash of firmware/ and data_objects.yaml, 16 hex digits */
+THINGSET_ADD_ITEM_STRING(ID_BUILD, ID_BUILD_SOURCE_HASH, "rSourceHash", build_source_hash, 17, THINGSET_ANY_R, SUBSET_SER);
+
 #endif /* CONFIG_THINGSET */
