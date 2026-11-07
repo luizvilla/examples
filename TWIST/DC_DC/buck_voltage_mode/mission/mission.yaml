@@ -52,7 +52,7 @@ steps:
   - id: size
     workbench: design
     title: Size the output filter
-    detail: Use design/sizing.py to find the smallest L and C that meet REQ-RIPPLE, then compare with the Twist's 33 uH, 14.1 uF of ceramics and 47 uF electrolytic.
+    detail: Use design/sizing.py to find the smallest L and C that meet REQ-RIPPLE and REQ-UNDERSHOOT, then compare with the Twist's 33 uH, 14.1 uF of ceramics and 47 uF electrolytic. Which requirement does the Twist's filter not meet on its own, and what would the controller have to do?
     opens: design/sizing.py
   - id: simulate
     workbench: lab
