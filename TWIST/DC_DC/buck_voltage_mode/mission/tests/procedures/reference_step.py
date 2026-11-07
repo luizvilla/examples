@@ -34,7 +34,9 @@ HOLD_S = {"simulator": (0.08, 0.05), "board": (3.0, 3.0)}
 V_LOW_MAX = 16.0
 BEFORE_S = 0.02             # waveform kept before the step
 CAPTURE_AFTER_S = 0.1       # the 12 V hold lasts at least this: the board's scope records 82 ms after the step
-RIPPLE_WINDOW_S = 5e-6      # the simulator's switching ripple is averaged out over this; the board samples once a period
+SMOOTH_S = 1e-3             # settling is judged on a 1 ms moving average, on both targets: single board samples
+                            # scatter by about 130 mV (sensor noise, measured 2026-11-07), the simulator's by its
+                            # ripple and duty steps (#12); 1 ms is far faster than the ~25 ms response
 POINTS = 2000               # at most, in waveform.csv
 
 
@@ -55,7 +57,7 @@ def settling_time(t, v, level, tolerance):
     """Seconds from the step (t = 0) until LOW1 stays within ±tolerance of level; None if it never does."""
     after = t >= 0
     t, v = t[after], v[after]
-    n = max(1, int(round(RIPPLE_WINDOW_S / np.median(np.diff(t)))))
+    n = max(1, int(round(SMOOTH_S / np.median(np.diff(t)))))
     if n > 1:
         v, t = np.convolve(v, np.ones(n) / n, "valid"), t[n - 1:]
     outside = np.where(np.abs(v - level) > tolerance * level)[0]
