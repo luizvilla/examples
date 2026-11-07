@@ -18,17 +18,24 @@ BENCH-MOD-01.
 
 Option hold_s (seconds at each level) shortens the run, for tests.
 """
+import pathlib
 import statistics
 
 import numpy as np
+import yaml
 
 PROCEDURE = {"title": "BUCK-REF-01 reference step 10 V -> 12 V", "level": "L1/L2", "targets": ["simulator", "board"],
              "tests": ["BUCK-REF-01a", "BUCK-REF-01b", "BUCK-REF-01c"],
              "power_on": {"group": "Converter", "name": "Mode", "value": 1},
              "twin": {"v_in": "v_high_V", "load_ohm": "load_ohm"}}
 
-LEVELS_V = (10.0, 12.0)
+MISSION = pathlib.Path(__file__).resolve().parents[2]
+TRACKING = next(r for r in yaml.safe_load((MISSION / "requirements.yaml").read_text())["requirements"]
+                if r["id"] == "REQ-TRACKING")
+LEVELS_V = tuple(float(v) for v in TRACKING["conditions"]["reference_step_V"])
 TOLERANCE = 0.02
+SETTLING_MAX_S = float(TRACKING["value"])            # REQ-TRACKING
+SETTLING_BAND = float(TRACKING["band_relative"])
 # Seconds at each level. The first includes start-up; the example PI settles in about 4 x 8.7 ms.
 HOLD_S = {"simulator": (0.08, 0.05), "board": (3.0, 3.0)}
 V_LOW_MAX = 16.0
@@ -100,16 +107,20 @@ def run(target, ctx):
         cases.append({"id": f"BUCK-REF-01{letter}", "title": f"Steady LOW1 at a {level:g} V reference",
                       "measured": mean, "expected": level, "unit": "V", "criterion": f"within {TOLERANCE:.0%}",
                       "passed": abs(mean - level) <= TOLERANCE * level, "window_s": window})
-    settling = settling_time(t, v, LEVELS_V[1], TOLERANCE)
-    title = "Settling into ±2 % after the 10 V → 12 V step"
+    settling = settling_time(t, v, LEVELS_V[1], SETTLING_BAND)
+    title = f"Settling into ±{SETTLING_BAND:.0%} after the {LEVELS_V[0]:g} V → {LEVELS_V[1]:g} V step"
+    criterion = f"at most {SETTLING_MAX_S * 1e3:g} ms (REQ-TRACKING)"
     if settling is None:
-        cases.append({"id": "BUCK-REF-01c", "title": title, "criterion": "information only", "verdict": "INFO",
+        cases.append({"id": "BUCK-REF-01c", "requirement": "REQ-TRACKING", "title": title, "criterion": criterion,
+                      "passed": False, "measured": f"> {t[-1] * 1e3:.0f}", "unit": "ms",
                       "reason": f"not settled within the {t[-1] * 1e3:.0f} ms recorded after the step"})
         ctx.log("settling: not within the waveform")
     else:
-        cases.append({"id": "BUCK-REF-01c", "title": title, "measured": settling * 1e3, "unit": "ms",
-                      "criterion": "information only", "verdict": "INFO"})
-        ctx.log(f"settling: {settling * 1e3:.2f} ms ({wave.get('source', target.kind)})")
+        cases.append({"id": "BUCK-REF-01c", "requirement": "REQ-TRACKING", "title": title, "measured": settling * 1e3,
+                      "unit": "ms", "expected": SETTLING_MAX_S * 1e3, "criterion": criterion,
+                      "passed": settling <= SETTLING_MAX_S})
+        ctx.log(f"settling: {settling * 1e3:.2f} ms ({wave.get('source', target.kind)}), REQ-TRACKING allows "
+                f"{SETTLING_MAX_S * 1e3:g} ms")
 
     step = max(1, len(t) // POINTS)
     csv = "t_s,rV1Low_V,rI1Low_A\n" + "".join(f"{a:.7g},{b:.7g},{c:.7g}\n" for a, b, c in zip(t[::step], v[::step], i[::step]))

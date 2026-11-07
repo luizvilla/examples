@@ -5,10 +5,11 @@
 # starts in, and the steps the student follows.
 
 id: twist-buck-hold-12v
-title: Make the Twist hold 12 V under a load step
+title: Make the Twist follow its reference and hold 12 V
 summary: >
   Size the output filter of a buck converter, compare it with the real
-  Twist, then make the PI controller hold 12 V when the load steps from 1 A to 1.5 A,
+  Twist, then tune the PI controller so LOW1 follows a 10 V to 12 V reference
+  step within 10 ms and holds 12 V when the load steps from 1 A to 1.5 A,
   first in simulation, then on the board.
 
 board:
@@ -56,16 +57,16 @@ steps:
     opens: design/sizing.py
   - id: simulate
     workbench: lab
-    title: Run the load step in simulation
-    detail: Run the BUCK-STEP-01 procedure on the simulator from the Lab (tests/procedures/step_response.py). Does the example's PI meet REQ-UNDERSHOOT and REQ-SETTLING? By how much margin, and what sets the dip?
+    title: Run the tests in simulation
+    detail: Run BUCK-STEP-01 (the load step) and BUCK-REF-01 (the reference step) on the simulator from the Lab. Which requirements does the example's PI meet, and which not? What sets the load-step dip, and what sets how fast LOW1 follows the reference?
     target: simulator
   - id: improve
     workbench: code
     title: Improve the control law
-    detail: Change control.cpp to improve the margins you found (tune the PI on the Bode plot in Design first), and keep every L1 test passing. Keep it free of hardware calls.
+    detail: Tune the PI on the Bode plot in Design until REQ-TRACKING can be met, apply the gains to control.cpp, and get every L1 test passing on the simulator. Keep control.cpp free of hardware calls.
     opens: firmware/control.cpp
   - id: bench
     workbench: lab
-    title: Run the same test on the board
-    detail: Flash the firmware and run BUCK-REF-01 on the Twist from the Lab. Compare the measurement with its simulation.
+    title: Run the reference step on the board
+    detail: Flash your firmware and run BUCK-REF-01 on the Twist from the Lab. Does the board meet REQ-TRACKING too? Compare the measurement with its simulation.
     target: board

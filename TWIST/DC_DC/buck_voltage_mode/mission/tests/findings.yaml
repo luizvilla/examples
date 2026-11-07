@@ -24,3 +24,9 @@ findings:
     owner: Luiz
     status: open
     blocks: "Checking the plant model's input current"
+  - issue: https://github.com/luizvilla/Theia/issues/16
+    criteria: [BUCK-REF-01c]
+    cause: "The exercise: the shipped PI (crossover 18 Hz) settles in about 19 ms in simulation, 31 ms on the board; REQ-TRACKING asks for 10 ms. The student tunes it (tests/test_mission_is_solvable.py: a solution exists)."
+    owner: student
+    status: open
+    blocks: "Nothing: the mission's starting state"

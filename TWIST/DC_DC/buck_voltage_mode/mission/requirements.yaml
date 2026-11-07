@@ -48,3 +48,13 @@ requirements:
     unit: V
     conditions: *nominal
     verified_by: [BUCK-STEP-01d]
+
+  - id: REQ-TRACKING
+    title: Following a reference step
+    statement: After the reference steps from 10 V to 12 V, LOW1 is within 2 % of 12 V within 10 ms and stays there, at the nominal conditions and on the bench (30 V in, 33 ohm).
+    port: LOW1
+    value: 0.010
+    unit: s
+    band_relative: 0.02
+    conditions: {<<: *nominal, reference_step_V: [10.0, 12.0]}
+    verified_by: [BUCK-REF-01c]

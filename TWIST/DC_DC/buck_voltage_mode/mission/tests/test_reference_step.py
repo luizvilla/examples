@@ -49,7 +49,9 @@ class OnAFakeBoard(unittest.TestCase):
             status = proc.run_procedure(MISSION, PROCEDURE, "board", io, allow_power=True,
                                         campaign=pathlib.Path(tmp) / "campaign", options={"hold_s": 0.1},
                                         target=target, twin=True)
-            self.assertEqual(status, 0, io.logs)
+            # The shipped PI is the exercise's starting point: too slow for REQ-TRACKING (BUCK-REF-01c),
+            # on the fake board as in its simulation. The levels pass.
+            self.assertEqual(status, 1, io.logs)
             (board_path, _), (sim_path, _) = io.records
             board = json.loads((board_path / "record.json").read_text())
             sim = json.loads((sim_path / "record.json").read_text())
@@ -58,6 +60,9 @@ class OnAFakeBoard(unittest.TestCase):
             self.assertEqual(sim["conditions"], board["conditions"])           # simulated at the board's conditions
             self.assertEqual(board["twin"], sim_path.name)
             settle = {r["target"]: next(c for c in r["cases"] if c["id"] == "BUCK-REF-01c") for r in (board, sim)}
+            for r in (board, sim):
+                self.assertEqual({c["id"]: c.get("passed") for c in r["cases"]},
+                                 {"BUCK-REF-01a": True, "BUCK-REF-01b": True, "BUCK-REF-01c": False})
             self.assertIn("measured", settle["board"])                       # no longer blocked on the board
             # Same plant, same control.cpp: the scope's 100 µs samples settle like the simulation. Settling is
             # judged on a 1 ms moving average (SMOOTH_S), whose own time resolution is about half its window.
