@@ -26,9 +26,6 @@
  * @author Ayoub Farah Hassan <ayoub.farah-hassan@laas.fr>
  */
 
-/*--------------Zephyr---------------------------------------- */
-#include <zephyr/console/console.h>
-
 /*--------------OWNTECH APIs---------------------------------- */
 #include "SpinAPI.h"
 #include "ShieldAPI.h"
@@ -37,13 +34,17 @@
 /*--------------OWNTECH Libraries----------------------------- */
 #include "control.h"
 
+/*--------------Data objects (ThingSet)------------------------ */
+/* Generated from data_objects.yaml: the variables below marked
+ * "data object" are read and written by the computer over ThingSet,
+ * on the board's second USB serial port (see app.overlay). */
+#include "data_objects.h"
+
 /*--------------SETUP FUNCTIONS DECLARATION------------------- */
 /* Setups the hardware and software of the system */
 void setup_routine();
 
 /*--------------LOOP FUNCTIONS DECLARATION-------------------- */
-/* Code to be executed in the slow communication task */
-void loop_communication_task();
 /* Code to be executed in the background task */
 void loop_application_task();
 /* Code to be executed in real time in the critical task */
@@ -56,27 +57,26 @@ static uint32_t control_task_period = 100;
 /* [bool] state of the PWM (ctrl task) */
 static bool pwm_enable = false;
 
-uint8_t received_serial_char;
+/* Measure variables (data objects, read-only) */
 
-/* Measure variables */
+float32_t V1_low_value;
+float32_t V2_low_value;
+float32_t I1_low_value;
+float32_t I2_low_value;
+float32_t I_high;
+float32_t V_high;
 
-static float32_t V1_low_value;
-static float32_t V2_low_value;
-static float32_t I1_low_value;
-static float32_t I2_low_value;
-static float32_t I_high;
-static float32_t V_high;
-
-static float32_t temp_1_value;
-static float32_t temp_2_value;
+float32_t temp_1_value;
+float32_t temp_2_value;
 
 /* Temporary storage fore measured value (ctrl task) */
 static float meas_data;
 
+/* Duty cycle applied to both legs (data object, read-only) */
 float32_t duty_cycle = 0.3;
 
-/* Voltage reference */
-static float32_t voltage_reference = 15;
+/* Voltage reference (data object, writable) */
+float32_t voltage_reference = 15;
 
 /* Control law period, in seconds (the PI itself lives in control.cpp) */
 static float32_t Ts = control_task_period * 1e-6;
@@ -84,12 +84,14 @@ static float32_t Ts = control_task_period * 1e-6;
 /*--------------------------------------------------------------- */
 
 /* LIST OF POSSIBLE MODES FOR THE OWNTECH CONVERTER */
-enum serial_interface_menu_mode
+enum converter_mode
 {
     IDLEMODE = 0,
     POWERMODE
 };
 
+/* Converter mode (data object, writable). Any value other than POWERMODE
+ * is treated as IDLEMODE, so an invalid write turns the PWM off. */
 uint8_t mode = IDLEMODE;
 
 /*--------------SETUP FUNCTIONS------------------------------- */
@@ -113,69 +115,29 @@ void setup_routine()
 
     /* Then declare tasks */
     uint32_t app_task_number = task.createBackground(loop_application_task);
-    uint32_t com_task_number = task.createBackground(loop_communication_task);
     task.createCritical(loop_critical_task, 100);
 
     /* Finally, start tasks */
     task.startBackground(app_task_number);
-    task.startBackground(com_task_number);
     task.startCritical();
 }
 
 /*--------------LOOP FUNCTIONS-------------------------------- */
 
 /**
- * This tasks implements a minimalistic USB serial interface to control
- * the buck converter.
- */
-void loop_communication_task()
-{
-    received_serial_char = console_getchar();
-    switch (received_serial_char)
-    {
-    case 'h':
-        /*----------SERIAL INTERFACE MENU----------------------- */
-        printk(" ________________________________________ \n"
-               "|     ---- MENU buck voltage mode ----   |\n"
-               "|     press i : idle mode                |\n"
-               "|     press p : power mode               |\n"
-               "|     press u : voltage reference UP     |\n"
-               "|     press d : voltage reference DOWN   |\n"
-               "|________________________________________|\n\n");
-        /*------------------------------------------------------ */
-        break;
-    case 'i':
-        printk("idle mode\n");
-        mode = IDLEMODE;
-        break;
-    case 'p':
-        printk("power mode\n");
-        mode = POWERMODE;
-        break;
-    case 'u':
-        voltage_reference += 0.5;
-        break;
-    case 'd':
-        voltage_reference -= 0.5;
-        break;
-    default:
-        break;
-    }
-}
-
-/**
  * This is the code loop of the background task
- * This task mostly logs back measurements to the USB serial interface.
+ * It shows the mode on the LED and measures temperatures. Measurements reach
+ * the computer as ThingSet data objects, so nothing is printed here.
  */
 void loop_application_task()
 {
-    if (mode == IDLEMODE)
-    {
-        spin.led.turnOff();
-    }
-    else if (mode == POWERMODE)
+    if (mode == POWERMODE)
     {
         spin.led.turnOn();
+    }
+    else
+    {
+        spin.led.turnOff();
     }
 
     shield.sensors.triggerTwistTempMeas(TEMP_SENSOR_1);
@@ -186,19 +148,6 @@ void loop_application_task()
 
     meas_data = shield.sensors.getLatestValue(TEMP_SENSOR_2);
     if (meas_data != NO_VALUE) temp_2_value = meas_data;
-
-    printk("%d:", mode);
-    printk("%.3f:", (double)I1_low_value);
-    printk("%.3f:", (double)V1_low_value);
-    printk("%.3f:", (double)voltage_reference);
-    printk("%.3f:", (double)I2_low_value);
-    printk("%.3f:", (double)V2_low_value);
-    printk("%.3f:", (double)voltage_reference);
-    printk("%.3f:", (double)I_high);
-    printk("%.3f:", (double)V_high);
-    printk("%.3f:", (double)temp_1_value);
-    printk("%.3f:", (double)temp_2_value);
-    printk("\n");
 
     task.suspendBackgroundMs(100);
 }
@@ -230,8 +179,7 @@ void loop_critical_task()
     meas_data = shield.sensors.getLatestValue(V_HIGH);
     if (meas_data != NO_VALUE) V_high = meas_data;
 
-
-    if (mode == IDLEMODE)
+    if (mode != POWERMODE)
     {
         if (pwm_enable == true)
         {
@@ -239,7 +187,7 @@ void loop_critical_task()
         }
         pwm_enable = false;
     }
-    else if (mode == POWERMODE)
+    else
     {
         Measurements m = {V1_low_value, I1_low_value, V2_low_value,
                           I2_low_value, V_high, I_high};
