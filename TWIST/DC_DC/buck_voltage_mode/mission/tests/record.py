@@ -25,9 +25,16 @@ def mission_identity(mission: pathlib.Path) -> dict:
             "dirty": bool(git("status", "--porcelain", "--", ".")) }
 
 
+def show(value) -> str:
+    text = f"{value:.4g}" if isinstance(value, (int, float)) and not isinstance(value, bool) else str(value)
+    return text.replace("|", "\\|")
+
+
 def write(out: pathlib.Path, procedure: str, level: str, target: str, cases: list[dict],
-          mission: pathlib.Path, inputs: dict[str, pathlib.Path], versions: dict[str, str]) -> bool:
-    """cases: [{id, title, criterion, measured, expected, unit, passed}]. Returns True if all pass."""
+          mission: pathlib.Path, inputs: dict[str, pathlib.Path], versions: dict[str, str],
+          board: dict | None = None) -> bool:
+    """cases: [{id, title, criterion, measured, expected, unit, passed}]. Returns True if all pass.
+    board: on the board target, its serial number and the build identity it reports."""
     out.mkdir(parents=True, exist_ok=True)
     passed = all(c["passed"] for c in cases)
     record = {
@@ -39,18 +46,24 @@ def write(out: pathlib.Path, procedure: str, level: str, target: str, cases: lis
         "versions": {"python": platform.python_version(), **versions},
         "cases": cases,
     }
+    if board is not None:
+        record["board"] = board
     (out / "record.json").write_text(json.dumps(record, indent=2) + "\n")
     lines = [f"# Test record: {procedure}", "",
              f"- Verdict: **{record['verdict']}**",
              f"- Level {level}, target {target}, {record['date']}",
              f"- Mission commit `{record['mission']['commit'][:12]}`" + (" (dirty: not reproducible)" if record["mission"]["dirty"] else ""),
-             "- Versions: " + ", ".join(f"{k} {v}" for k, v in record["versions"].items()), "",
+             "- Versions: " + ", ".join(f"{k} {v}" for k, v in record["versions"].items())]
+    if board is not None:
+        lines.append(f"- Board `{board['serial_number']}` running commit `{board['commit'][:12]}`"
+                     f"{' (dirty)' if board['dirty'] else ''}, sources `{board['source_hash']}`")
+    lines += ["",
              "| Case | Requirement | Check | Measured | Expected | Criterion | Verdict |",
              "| --- | --- | --- | --- | --- | --- | --- |"]
     for c in cases:
         unit = c.get("unit", "")
-        lines.append(f"| {c['id']} | {c.get('requirement', '—')} | {c['title']} | {c['measured']:.4g} {unit} | "
-                     f"{c['expected']:.4g} {unit} | {c['criterion']} | {'PASS' if c['passed'] else 'FAIL'} |")
+        lines.append(f"| {c['id']} | {c.get('requirement', '—')} | {c['title']} | {show(c['measured'])} {unit} | "
+                     f"{show(c['expected'])} {unit} | {c['criterion'].replace('|', chr(92) + '|')} | {'PASS' if c['passed'] else 'FAIL'} |")
     lines += ["", "Input hashes (SHA-256):", ""] + [f"- `{k}`: `{v[:16]}…`" for k, v in record["inputs"].items()]
     (out / "record.md").write_text("\n".join(lines) + "\n")
     return passed
