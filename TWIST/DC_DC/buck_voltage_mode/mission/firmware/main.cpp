@@ -35,7 +35,7 @@
 #include "TaskAPI.h"
 
 /*--------------OWNTECH Libraries----------------------------- */
-#include "pid.h"
+#include "control.h"
 
 /*--------------SETUP FUNCTIONS DECLARATION------------------- */
 /* Setups the hardware and software of the system */
@@ -78,16 +78,8 @@ float32_t duty_cycle = 0.3;
 /* Voltage reference */
 static float32_t voltage_reference = 15;
 
-/* PID coefficients for a 8.6ms step response*/
-static float32_t kp = 0.000215;
-static float32_t Ti = 7.5175e-5;
-static float32_t Td = 0.0;
-static float32_t N = 0.0;
-static float32_t upper_bound = 1.0F;
-static float32_t lower_bound = 0.0F;
+/* Control law period, in seconds (the PI itself lives in control.cpp) */
 static float32_t Ts = control_task_period * 1e-6;
-static PidParams pid_params(Ts, kp, Ti, Td, N, lower_bound, upper_bound);
-static Pid pid;
 
 /*--------------------------------------------------------------- */
 
@@ -117,7 +109,7 @@ void setup_routine()
 
     shield.sensors.enableDefaultTwistSensors();
 
-    pid.init(pid_params);
+    control_init(Ts);
 
     /* Then declare tasks */
     uint32_t app_task_number = task.createBackground(loop_application_task);
@@ -249,7 +241,9 @@ void loop_critical_task()
     }
     else if (mode == POWERMODE)
     {
-        duty_cycle = pid.calculateWithReturn(voltage_reference, V1_low_value);
+        Measurements m = {V1_low_value, I1_low_value, V2_low_value,
+                          I2_low_value, V_high, I_high};
+        duty_cycle = control_step(voltage_reference, m);
         shield.power.setDutyCycle(ALL,duty_cycle);
 
         /* Set POWER ON */
