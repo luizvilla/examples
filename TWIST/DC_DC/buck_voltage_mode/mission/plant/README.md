@@ -22,5 +22,6 @@ python plant/model_tests/run_model_tests.py
 ## Not yet done
 
 - **Comparison with the board.** Run the buck example on a Twist and file the same quantities as a bench record. Until then, the model is only shown to agree with first principles, not with the hardware.
-- **Low-confidence parameters.** These are the LOW1 capacitance (which KiCad capacitor is the output one), the dead time (take it from Core's HRTIM configuration), and the switch and diode parameters. No ESR or inductor DCR is modelled yet.
+- **LOW1 capacitance (found in step 3).** The two 33 µF electrolytics are on the HIGH side. LOW has 3 × 4.7 µF ceramics (C206, C209, C212) and a 47 µF electrolytic (C203, EEE-FN2A470UL, ESR 0.70 Ω) switched in by Q203; the firmware connects it with `shield.power.connectCapacitor(ALL)`. The ceramics' DC-bias derating is not modelled.
+- **Low-confidence parameters.** The dead time (take it from Core's HRTIM configuration and the driver), the on-resistance of Q203, and the switch and diode parameters. No inductor DCR is modelled yet.
 - **A PulsimGUI view.** Core2 keeps its plant as a `.pulsim` schematic. Here the builder script is the source, and a `.pulsim` view for PulsimGUI is still to be generated from it.

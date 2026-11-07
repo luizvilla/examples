@@ -109,6 +109,8 @@ void setup_routine()
 {
     /* Buck voltage mode */
     shield.power.initBuck(ALL);
+    /* The Twist datasheet's mode table: in DC-DC buck the LOW-side electrolytic is on. */
+    shield.power.connectCapacitor(ALL);
 
     shield.sensors.enableDefaultTwistSensors();
 

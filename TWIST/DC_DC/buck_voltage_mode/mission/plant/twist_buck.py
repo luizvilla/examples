@@ -2,7 +2,12 @@
 """Switched plant model of one Twist leg in buck mode, built with Pulsim.
 
 HIGH port source -> high-side and low-side switches (with body diodes) ->
-inductor -> LOW1 capacitor and load. Parameters come from params.yaml.
+inductor -> LOW1 ceramics, the switched electrolytic (with its ESR and the
+on-resistance of its switch) and the load. Parameters come from params.yaml.
+
+On the Twist 1.4.3 the two 33 uF electrolytics are on the HIGH side; LOW has
+3 x 4.7 uF ceramics and a 47 uF electrolytic switched in by Q203
+(shield.power.connectCapacitor).
 
     from twist_buck import load_params, build
     plant = build(load_params())
@@ -38,12 +43,14 @@ class Trace:
 
 
 class TwistBuck:
-    def __init__(self, params: dict, load_ohm: float | None = None):
+    def __init__(self, params: dict, load_ohm: float | None = None, electrolytic: bool | None = None):
         if p.__version__ != PULSIM_VERSION:
             raise RuntimeError(f"plant model needs pulsim=={PULSIM_VERSION}, found {p.__version__}")
         self.params = dict(params)
         if load_ohm is not None:
             self.params["load_ohm"] = load_ohm
+        if electrolytic is not None:
+            self.params["electrolytic_connected"] = 1.0 if electrolytic else 0.0
         q = self.params
         b = p.CircuitBuilder()
         g_on, g_off = 1.0 / q["switch_on_ohm"], 1e-9
@@ -53,7 +60,10 @@ class TwistBuck:
         b.add_diode("D_hs", "sw", "high", g_on, g_off, q["diode_forward_V"])
         b.add_diode("D_ls", "0", "sw", g_on, g_off, q["diode_forward_V"])
         b.add_inductor("L1", "sw", "low1", q["inductance_H"])
-        b.add_capacitor("C1", "low1", "0", q["capacitance_F"])
+        b.add_capacitor("C1", "low1", "0", q["ceramic_capacitance_F"])
+        if q["electrolytic_connected"]:
+            b.add_resistor("R_elec", "low1", "elec", q["electrolytic_esr_ohm"] + q["electrolytic_switch_ohm"])
+            b.add_capacitor("C_elec", "elec", "0", q["electrolytic_capacitance_F"])
         b.add_resistor("R_load", "low1", "0", q["load_ohm"])
         self.builder = b
         self.hs = b.switch_index_of("S_hs")
@@ -81,5 +91,6 @@ class TwistBuck:
         return Trace(np.asarray(res.times), np.asarray(res.v("low1")), np.asarray(res.i("L1")))
 
 
-def build(params: dict, load_ohm: float | None = None) -> TwistBuck:
-    return TwistBuck(params, load_ohm)
+def build(params: dict, load_ohm: float | None = None, electrolytic: bool | None = None) -> TwistBuck:
+    """electrolytic: None keeps params' electrolytic_connected; True or False overrides it."""
+    return TwistBuck(params, load_ohm, electrolytic)

@@ -17,7 +17,7 @@ board:
 
 # The five converter blocks, as Home draws them for this board.
 blocks:
-  power:       {title: Power,       summary: "Two half-bridge legs, 33 uH and 33 uF per leg, fuses, WAGO connectors, heatsink", opens: plant/params.yaml}
+  power:       {title: Power,       summary: "Two half-bridge legs; per leg 33 uH, 3 x 4.7 uF ceramics and a switched 47 uF electrolytic on LOW; fuses, WAGO connectors, heatsink", opens: plant/params.yaml}
   measurement: {title: Measurement, summary: "Isolated Hall current sensors, voltage dividers, isolation amplifier on the high side", opens: firmware/data_objects.h}
   controller:  {title: Controller,  summary: "Spin board (STM32G4): ADCs, HRTIM PWM, ThingSet over USB", opens: firmware/control.cpp}
   driver:      {title: Driver,      summary: "Gate drivers of the two legs", opens: null}
@@ -52,7 +52,7 @@ steps:
   - id: size
     workbench: design
     title: Size the output filter
-    detail: Use design/sizing.py to find the smallest L and C that meet REQ-RIPPLE, then compare with the Twist's 33 uH and 33 uF.
+    detail: Use design/sizing.py to find the smallest L and C that meet REQ-RIPPLE, then compare with the Twist's 33 uH, 14.1 uF of ceramics and 47 uF electrolytic.
     opens: design/sizing.py
   - id: simulate
     workbench: lab

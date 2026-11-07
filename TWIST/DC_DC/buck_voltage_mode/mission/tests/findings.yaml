@@ -4,4 +4,10 @@
 # with its issue. A finding whose criteria all pass is shown as ready to close.
 # When the issue is closed, set status: closed and keep the entry.
 
-findings: []
+findings:
+  - issue: https://github.com/luizvilla/Theia/issues/11
+    criteria: [BUCK-STEP-01b]
+    cause: "At a 100 µs control period no PI gets the load-step undershoot below 5.67 % (study undershoot_vs_period); 4.92 % at 20 µs. The dip is the filter's passive response."
+    owner: Luiz
+    status: open
+    blocks: "Students solving the mission as specified"

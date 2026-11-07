@@ -41,7 +41,7 @@ def case(cid, title, measured, expected, tolerance, unit=""):
 
 def main(out):
     q = load_params()
-    f, vin, L, C = q["switching_freq_Hz"], q["port_high_V"], q["inductance_H"], q["capacitance_F"]
+    f, vin, L, C = q["switching_freq_Hz"], q["port_high_V"], q["inductance_H"], q["ceramic_capacitance_F"]
     cases = []
 
     # PM-01: steady-state output voltage at two duty cycles.
@@ -57,12 +57,15 @@ def main(out):
             # PM-02: inductor current ripple.
             cases.append(case("PM-02", "inductor current ripple, peak to peak",
                               di, sizing.inductor_ripple(vin, v_out, L, f), 0.10, "A"))
-            # PM-03: output voltage ripple, from the measured current ripple.
+            # PM-03: output voltage ripple, from the measured current ripple. At 200 kHz
+            # the ceramics carry the ripple: the electrolytic branch is 0.9 ohm against 0.06 ohm.
             cases.append(case("PM-03", "LOW1 voltage ripple, peak to peak",
                               dv, sizing.output_ripple(di, C, f), 0.15, "V"))
 
-    # PM-04: LC resonance, from the start-up ringing at light load.
-    tr = build(q, load_ohm=60.0).run_open_loop(0.3, 2e-3)
+    # PM-04: LC resonance, from the start-up ringing at light load, with the
+    # electrolytic switched out (its ESR damps the ringing, and E16's AC sweep
+    # checks the plant with it).
+    tr = build(q, load_ohm=60.0, electrolytic=False).run_open_loop(0.3, 2e-3)
     v, t = period_mean(tr, f)
     final = v[t > 1.6e-3].mean()
     rising = np.where((v[:-1] < final) & (v[1:] >= final))[0]

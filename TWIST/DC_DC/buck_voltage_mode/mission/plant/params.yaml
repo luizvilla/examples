@@ -10,7 +10,11 @@ board_version: "1.4.3"
 
 port_high_V:        {value: 40.0,    source: "mission operating point; inside the 20-60 V supply range of the buck example", confidence: high}
 inductance_H:       {value: 33.0e-6, source: "TWIST KiCad PowerLeg.kicad_sch v1.4.3, inductor value", confidence: medium}
-capacitance_F:      {value: 33.0e-6, source: "TWIST KiCad PowerLeg.kicad_sch v1.4.3, 33 uF capacitor; that it is the LOW-side output capacitor is inferred", confidence: low}
+ceramic_capacitance_F:      {value: 14.1e-6, source: "TWIST KiCad PowerLeg.kicad_sch v1.4.3: C206, C209, C212, 3 x 4.7 uF ceramics between the inductor and LOW (left of L201). DC-bias derating not included", confidence: medium}
+electrolytic_capacitance_F: {value: 47.0e-6, source: "TWIST KiCad PowerLeg.kicad_sch v1.4.3: C203, Panasonic EEE-FN2A470UL, 47 uF 100 V, on LOW, switched by Q203", confidence: high}
+electrolytic_esr_ohm:       {value: 0.70,    source: "Panasonic FN series datasheet (KiCAD_files/datasheet/RDE0000C1266): EEE-FN2A470UL ESR 0.70 ohm at 100 kHz, 20 C", confidence: high}
+electrolytic_switch_ohm:    {value: 0.22,    source: "Q203 DMN10H220L on-resistance, about 220 mOhm by its part name; not measured", confidence: low}
+electrolytic_connected:     {value: 1,       source: "the mission firmware calls shield.power.connectCapacitor(ALL), as the Twist datasheet's mode table asks for DC-DC buck (Luiz, 2026-11-07)", confidence: high}
 switching_freq_Hz:  {value: 200000.0, source: "TWIST datasheet: 200 kHz", confidence: high}
 dead_time_s:        {value: 100.0e-9, source: "assumption; take the real value from the HRTIM configuration of Core", confidence: low}
 switch_on_ohm:      {value: 0.01,    source: "placeholder MOSFET on-resistance", confidence: low}
