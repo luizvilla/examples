@@ -1,0 +1,33 @@
+# Data objects of the buck voltage-mode mission.
+#
+# Every value the firmware exchanges with the computer through ThingSet is
+# declared here, once. tools/gen_data_objects.py turns this file into
+# firmware/data_objects.h and firmware/data_objects.cpp: never edit those
+# two files by hand. OwnStudio shows this file as the data object table.
+#
+# Naming follows ThingSet: an "r" prefix is read-only, a "w" prefix is
+# writable, no prefix is a writable setting. The part after the last "_"
+# is the unit, and must match "unit". Quote descriptions: inside { } a
+# comma would otherwise end the description.
+
+subset: SER            # ThingSet subset every object belongs to (serial)
+
+groups:
+  - name: Measurements
+    id: 0x05
+    objects:
+      - {name: rV1Low_V,    id: 0x50, type: float, decimals: 2, unit: V,    variable: V1_low_value,  description: "Low-side voltage of leg 1"}
+      - {name: rV2Low_V,    id: 0x51, type: float, decimals: 2, unit: V,    variable: V2_low_value,  description: "Low-side voltage of leg 2"}
+      - {name: rVHigh_V,    id: 0x52, type: float, decimals: 2, unit: V,    variable: V_high,        description: "High-side voltage"}
+      - {name: rI1Low_A,    id: 0x53, type: float, decimals: 2, unit: A,    variable: I1_low_value,  description: "Low-side current of leg 1"}
+      - {name: rI2Low_A,    id: 0x54, type: float, decimals: 2, unit: A,    variable: I2_low_value,  description: "Low-side current of leg 2"}
+      - {name: rIHigh_A,    id: 0x55, type: float, decimals: 2, unit: A,    variable: I_high,        description: "High-side current"}
+      - {name: rTemp1_degC, id: 0x56, type: float, decimals: 1, unit: degC, variable: temp_1_value,  description: "Temperature of leg 1"}
+      - {name: rTemp2_degC, id: 0x57, type: float, decimals: 1, unit: degC, variable: temp_2_value,  description: "Temperature of leg 2"}
+      - {name: rDuty,       id: 0x5A, type: float, decimals: 4,             variable: duty_cycle,    description: "Duty cycle applied to both legs, 0 to 1"}
+
+  - name: Control
+    id: 0x06
+    objects:
+      - {name: Mode,          id: 0x61, type: uint8,              variable: mode,              description: "0 idle (PWM off), 1 power (PWM on, PI running)"}
+      - {name: wVoltageRef_V, id: 0x62, type: float, decimals: 2, unit: V, variable: voltage_reference, description: "Output voltage reference of the PI"}
