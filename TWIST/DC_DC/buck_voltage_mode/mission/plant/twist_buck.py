@@ -44,7 +44,9 @@ class Trace:
 
 class TwistBuck:
     def __init__(self, params: dict, load_ohm: float | None = None, electrolytic: bool | None = None):
-        if p.__version__ != PULSIM_VERSION:
+        # A local build of the same release (2.0.0+exactedges, luizvilla/Theia#12) is accepted;
+        # records stamp the full version.
+        if p.__version__.split("+")[0] != PULSIM_VERSION:
             raise RuntimeError(f"plant model needs pulsim=={PULSIM_VERSION}, found {p.__version__}")
         self.params = dict(params)
         if load_ohm is not None:

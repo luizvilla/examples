@@ -59,8 +59,9 @@ class OnAFakeBoard(unittest.TestCase):
             self.assertEqual(board["twin"], sim_path.name)
             settle = {r["target"]: next(c for c in r["cases"] if c["id"] == "BUCK-REF-01c") for r in (board, sim)}
             self.assertIn("measured", settle["board"])                       # no longer blocked on the board
-            # Same plant, same control.cpp: the scope's 100 µs samples settle like the 1 µs simulation, within 2 periods.
-            self.assertAlmostEqual(settle["board"]["measured"], settle["simulator"]["measured"], delta=0.2)
+            # Same plant, same control.cpp: the scope's 100 µs samples settle like the simulation. Settling is
+            # judged on a 1 ms moving average (SMOOTH_S), whose own time resolution is about half its window.
+            self.assertAlmostEqual(settle["board"]["measured"], settle["simulator"]["measured"], delta=0.5)
             wave = (board_path / "waveform.csv").read_text().splitlines()
             self.assertEqual(wave[0], "t_s,rV1Low_V,rI1Low_A")
             self.assertEqual(len(wave) - 1, 1024 - 205 + 200)                  # the scope's window from 20 ms before the step

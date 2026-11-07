@@ -17,6 +17,7 @@ plant is plant/twist_buck.py (one leg; leg 2 reads the same as leg 1).
 from __future__ import annotations
 
 import ctypes
+import inspect
 import math
 import os
 import pathlib
@@ -32,6 +33,9 @@ sys.path[:0] = [str(MISSION / "plant")]
 from twist_buck import build, load_params  # noqa: E402
 
 CONTROL_PERIOD_S = 100e-6     # critical task period of main.cpp
+# Pulsim with exact gate edges (simulate(edge_fn=...), luizvilla/Theia#12): PWM edges land where
+# they fall, not on the 25 ns step grid. Without it the duty moves in 0.5 % steps.
+EXACT_EDGES = "edge_fn" in inspect.signature(p.simulate).parameters
 DEFAULT_REFERENCE_V = 12.0    # main.cpp's voltage_reference at boot
 
 
@@ -82,12 +86,12 @@ class Harness:
         self.hs, self.ls, self.step_sw = b.switch_index_of("S_hs"), b.switch_index_of("S_ls"), b.switch_index_of("S_step")
         self.mask = p.SwitchStateMask(b.graph.num_switches)
         self.period, self.dead = 1.0 / q["switching_freq_Hz"], q["dead_time_s"]
-        # The fixed simulation step quantizes the PWM edges: 200 steps per period, so the duty
-        # moves in 0.5 % quanta (the Twist's HRTIM has 184 ps). Edges are placed by step index,
-        # never by comparing times, so the result does not depend on how the run is segmented.
-        # Carrying the rounding to the next period (sigma-delta) makes the mean duty exact but
-        # adds about 30 mV of low-frequency ripple, so it is not done: see the plant model's
-        # limitations in the step 4 report.
+        # With EXACT_EDGES, Pulsim splits a step at each PWM edge (edge_fn) and the duty is exact.
+        # Without it, the fixed 25 ns step quantizes the edges: 200 steps per period, so the duty
+        # moves in 0.5 % quanta (the Twist's HRTIM has 184 ps); the edges are then placed by step
+        # index, never by comparing times, so the result does not depend on how the run is
+        # segmented. (Carrying the rounding forward, sigma-delta, makes the mean exact but adds
+        # about 30 mV of low-frequency ripple, so it is not done.)
         self.dt = q["step_s"]
         self.steps = int(round(self.period / self.dt))
         self.dead_steps = int(round(self.dead / self.dt))
@@ -149,11 +153,34 @@ class Harness:
             self.on_steps = min(max(int(round(self.command * self.steps)), 0), self.steps)
             self.pwm_k, self.applied = k, self.command
         on = self.mode == 1
+        if EXACT_EDGES:
+            phase, d = max(0.0, t - k * self.period), min(max(self.applied, 0.0), 1.0)
+            self.mask.set(self.hs, on and self.dead <= phase < d * self.period)
+            self.mask.set(self.ls, on and d * self.period + self.dead <= phase < self.period)
+            self.mask.set(self.step_sw, self.load_step)
+            return self.mask
         step = int(round((t - k * self.period) / self.dt))
         self.mask.set(self.hs, on and self.dead_steps <= step < self.on_steps)
         self.mask.set(self.ls, on and self.on_steps + self.dead_steps <= step < self.steps)
         self.mask.set(self.step_sw, self.load_step)
         return self.mask
+
+    def _edge_fn(self, t0, t1):
+        """The first PWM edge strictly inside (t0, t1), for Pulsim's exact gate edges; inf if none.
+        A period not yet started takes the duty the controller has just commanded."""
+        if self.mode != 1:
+            return math.inf
+        k = int(math.floor(t0 / self.period + 1e-6))
+        for kk in (k, k + 1, k + 2):
+            d = self.applied if kk == self.pwm_k else self.command
+            d = min(max(d, 0.0), 1.0)
+            start = kk * self.period
+            for e in (start, start + self.dead, start + d * self.period, start + d * self.period + self.dead):
+                if t0 < e < t1:
+                    return e
+            if start > t1:
+                break
+        return math.inf
 
     def _observer(self, t, x):
         if t >= self.next_tick - 1e-12:         # one control step per control period, as the critical task
@@ -168,6 +195,8 @@ class Harness:
             return
         end = self.t + seconds
         kwargs = {"resume_from": self.snapshot} if self.snapshot is not None else {}
+        if EXACT_EDGES:
+            kwargs["edge_fn"] = self._edge_fn
         res = p.simulate(self.b, t_start=self.t, t_end=end, dt=self.q["step_s"], engine="pwl", switch_fn=self._switch_fn,
                          step_observer=self._observer, store_every=self.store_every, **kwargs)
         self.snapshot = res.final_snapshot

@@ -1,3 +1,6 @@
+# pulsim 2.0.0 quantizes PWM edges to its 25 ns step (luizvilla/Theia#12). Built from
+# lgili/Pulsim with exact gate edges (branch fix/exact-pwm-edges, version 2.0.0+exactedges),
+# tests/sim_harness.py uses them; with 2.0.0 it falls back to step-index edges.
 pulsim==2.0.0
 numpy==2.4.6
 PyYAML==6.0.3
