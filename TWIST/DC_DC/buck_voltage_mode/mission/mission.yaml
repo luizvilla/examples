@@ -8,7 +8,7 @@ id: twist-buck-hold-12v
 title: Make the Twist hold 12 V under a load step
 summary: >
   Size the output filter of a buck converter, compare it with the real
-  Twist, then make the PI controller hold 12 V when the load doubles,
+  Twist, then make the PI controller hold 12 V when the load steps from 1 A to 1.5 A,
   first in simulation, then on the board.
 
 board:
@@ -52,20 +52,20 @@ steps:
   - id: size
     workbench: design
     title: Size the output filter
-    detail: Use design/sizing.py to find the smallest L and C that meet REQ-RIPPLE and REQ-UNDERSHOOT, then compare with the Twist's 33 uH, 14.1 uF of ceramics and 47 uF electrolytic. Which requirement does the Twist's filter not meet on its own, and what would the controller have to do?
+    detail: Use design/sizing.py to find the smallest L and C that meet REQ-RIPPLE and REQ-UNDERSHOOT, then compare with the Twist's 33 uH, 14.1 uF of ceramics and 47 uF electrolytic. Does the Twist's filter meet them on its own? By how much, and what is left for the controller to do?
     opens: design/sizing.py
   - id: simulate
     workbench: lab
     title: Run the load step in simulation
-    detail: Run the BUCK-STEP-01 procedure on the simulator from the Lab (tests/procedures/step_response.py). With the example's PI, REQ-UNDERSHOOT fails. Find out why.
+    detail: Run the BUCK-STEP-01 procedure on the simulator from the Lab (tests/procedures/step_response.py). Does the example's PI meet REQ-UNDERSHOOT and REQ-SETTLING? By how much margin, and what sets the dip?
     target: simulator
   - id: improve
     workbench: code
     title: Improve the control law
-    detail: Change control.cpp until the L1 test passes. Keep it free of hardware calls.
+    detail: Change control.cpp to improve the margins you found (tune the PI on the Bode plot in Design first), and keep every L1 test passing. Keep it free of hardware calls.
     opens: firmware/control.cpp
   - id: bench
     workbench: lab
     title: Run the same test on the board
-    detail: Flash the firmware and repeat the load step on the Twist. Compare with the simulation.
+    detail: Flash the firmware and run BUCK-REF-01 on the Twist from the Lab. Compare the measurement with its simulation.
     target: board

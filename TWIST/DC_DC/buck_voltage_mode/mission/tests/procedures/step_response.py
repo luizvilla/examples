@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LGPL-2.1
-"""BUCK-STEP-01: the 1 A -> 2 A load step at 12 V, with control.cpp closed loop (L1 on the simulator).
+"""BUCK-STEP-01: the 1 A -> 1.5 A load step at 12 V, with control.cpp closed loop (L1 on the simulator).
 
 A procedure: python -m ownstudio_lab.procedure . tests/procedures/step_response.py --target simulator
 (or from OwnStudio's Lab). It switches the converter on at 12 V, waits 60 ms,
@@ -24,8 +24,10 @@ REQUIREMENTS = {r["id"]: r for r in yaml.safe_load((MISSION / "requirements.yaml
 
 # Scenario of BUCK-STEP-01 (the nominal conditions of requirements.yaml)
 REFERENCE_V = float(REQUIREMENTS["REQ-VOUT"]["value"])
-LOAD_BEFORE_OHM = 12.0          # 1 A at 12 V
-LOAD_ADDED_OHM = 12.0           # in parallel from the step: 2 A at 12 V
+# The load step of REQ-UNDERSHOOT (1 A -> 1.5 A since Luiz's decision on #11): 12 ohm, then 24 ohm in parallel
+STEP_A = [float(a) for a in REQUIREMENTS["REQ-UNDERSHOOT"]["conditions"]["load_step_A"]]
+LOAD_BEFORE_OHM = REFERENCE_V / STEP_A[0]
+LOAD_ADDED_OHM = REFERENCE_V / (STEP_A[1] - STEP_A[0])
 V_IN = 40.0                     # the nominal conditions of requirements.yaml
 STEP_AT_S = 60e-3
 END_S = 100e-3
@@ -62,7 +64,7 @@ def evaluate(q, t, v):
         {"id": "BUCK-STEP-01a", "requirement": "REQ-VOUT", "title": "mean LOW1 voltage before the load step", "measured": float(steady),
          "expected": REFERENCE_V, "unit": "V", "criterion": f"within {STEADY_TOLERANCE:.0%} of {REFERENCE_V} V",
          "passed": bool(abs(steady - REFERENCE_V) <= STEADY_TOLERANCE * REFERENCE_V)},
-        {"id": "BUCK-STEP-01b", "requirement": "REQ-UNDERSHOOT", "title": "lowest LOW1 voltage after the 1 A to 2 A step", "measured": float(lowest),
+        {"id": "BUCK-STEP-01b", "requirement": "REQ-UNDERSHOOT", "title": f"lowest LOW1 voltage after the {STEP_A[0]:g} A to {STEP_A[1]:g} A step", "measured": float(lowest),
          "expected": REFERENCE_V * (1 - UNDERSHOOT_MAX), "unit": "V", "criterion": f"at least {1 - UNDERSHOOT_MAX:.0%} of the reference",
          "passed": bool(lowest >= REFERENCE_V * (1 - UNDERSHOOT_MAX))},
         {"id": "BUCK-STEP-01c", "requirement": "REQ-SETTLING",
@@ -81,6 +83,10 @@ def run(target, ctx):
     q = getattr(getattr(target, "harness", None), "q", None)
     if q is None:
         raise RuntimeError("BUCK-STEP-01 needs the simulator harness")
+    harness = target.harness
+    if abs(harness.load_ohm - LOAD_BEFORE_OHM) > 1e-9 or abs(harness.step_load_ohm - LOAD_ADDED_OHM) > 1e-9:
+        raise RuntimeError(f"the simulator's loads ({harness.load_ohm:g} ohm, step {harness.step_load_ohm:g} ohm) are not "
+                           f"REQ-UNDERSHOOT's ({LOAD_BEFORE_OHM:g} ohm, step {LOAD_ADDED_OHM:g} ohm)")
     ctx.log(f"Converter on at {REFERENCE_V} V, {V_IN} V in, load {LOAD_BEFORE_OHM} ohm")
     target.update("Converter", {"wVoltageRef_V": REFERENCE_V})
     target.update("Converter", {"Mode": 1})

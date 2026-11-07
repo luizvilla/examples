@@ -60,7 +60,7 @@ tests:
   - {id: L0-CTL-06, blocks: [controller],  tab: control, level: L0, target: pc, status: implemented, title: "After reset the first step equals L0-CTL-02", criterion: "within 1e-6"}
 
   # Closed loop: tests/procedures/step_response.py on the simulator
-  - {id: BUCK-STEP-01a, blocks: [power, controller], tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-VOUT], title: "Mean LOW1 voltage before the 1 A → 2 A load step", criterion: "within 2 % of 12 V"}
+  - {id: BUCK-STEP-01a, blocks: [power, controller], tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-VOUT], title: "Mean LOW1 voltage before the 1 A → 1.5 A load step", criterion: "within 2 % of 12 V"}
   - {id: BUCK-STEP-01b, blocks: [power, controller], tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-UNDERSHOOT], title: "Lowest LOW1 voltage after the load step", criterion: "at least 95 % of 12 V"}
   - {id: BUCK-STEP-01c, blocks: [power, controller], tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-SETTLING], title: "Settling back into ±2 % after the load step", criterion: "at most 10 ms, and settled by the end"}
   - {id: BUCK-STEP-01d, blocks: [power, controller], tab: loop, level: L1, target: simulator, status: implemented, requirements: [REQ-RIPPLE], title: "LOW1 ripple, peak to peak, before the step", criterion: "at most 100 mV"}
@@ -76,7 +76,7 @@ tests:
     target: board
     status: blocked
     blocked_by: "a switched load on the bench (the waveform comes from the firmware scope since step 4)"
-    title: "The 1 A → 2 A load step on the board"
+    title: "The 1 A → 1.5 A load step on the board"
     criterion: "the BUCK-STEP-01 criteria, measured on the board"
 
   # Board link (tests/l2/run_l2_link.py)

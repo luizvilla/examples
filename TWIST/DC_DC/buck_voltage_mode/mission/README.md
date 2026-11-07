@@ -1,6 +1,6 @@
 # Mission: make the Twist hold 12 V under a load step
 
-The first OwnStudio mission, built on the buck voltage-mode example. The student sizes the buck's output filter and compares it with the real Twist. Then they make the PI controller hold 12 V when the load doubles, first in the Pulsim simulator (L1), then on the board (L2).
+The first OwnStudio mission, built on the buck voltage-mode example. The student sizes the buck's output filter and compares it with the real Twist. Then they make the PI controller hold 12 V when the load steps from 1 A to 1.5 A, first in the Pulsim simulator (L1), then on the board (L2).
 
 OwnStudio opens this folder through `mission.yaml`. Every file is plain text, and everything also works without OwnStudio.
 
@@ -63,7 +63,7 @@ python -m ownstudio_lab.procedure . tests/procedures/reference_step.py --target 
 | Firmware build against OwnTech Core 8111a0d | Builds: flash 79 %, RAM 41 % |
 | L0, control law (6 cases) | Pass |
 | Plant model tests (5 checks against the analytic buck) | Pass |
-| L1, BUCK-STEP-01 | 3 of 4 pass. **REQ-UNDERSHOOT fails**: LOW1 dips to 11.32 V on the 1 A to 2 A step (5 % allows 11.4 V). The dip is the output filter's own response. A study finds that no PI at the firmware's 100 µs period gets below 5.67 % ([issue #11](https://github.com/luizvilla/Theia/issues/11)); the requirement is Luiz's decision |
+| L1, BUCK-STEP-01 | 4 of 4 pass on the 1 A to 1.5 A step: LOW1 dips to 11.65 V (5 % allows 11.4 V). The step was 1 A to 2 A until #11: there LOW1 dipped to 11.32 V, and no PI at the firmware's 100 µs period gets below 5.67 % (tests/studies/undershoot_vs_period.py); Luiz halved the step ([issue #11](https://github.com/luizvilla/Theia/issues/11)) |
 | L1, BUCK-REF-01 (10 V → 12 V) | Pass on the simulator |
 | L2, link test on the Twist (6 cases) | Pass |
 | Bench, BENCH-MOD-01 and BUCK-REF-01 on the board | Not run yet: need an operator at the bench |

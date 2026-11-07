@@ -104,6 +104,8 @@ def size(requirements: dict, params: dict, ripple_ratio: float = 0.4, control_pe
     C_dip = capacitance_for_undershoot(delta_step, undershoot_max, L_twist)
     f0 = resonance(L_twist, C_twist)
     f_c_needed = delta_step / (2.0 * math.pi * C_twist * undershoot_max)
+    dip_lc = undershoot_lc(delta_step, L_twist, C_twist)
+    passive_ok = dip_lc <= undershoot_max      # the filter alone holds the dip: no crossover is needed for it
     results = [
         {"id": "L", "title": f"Inductance for a current ripple of {ripple_ratio:.0%} of {i_after:g} A",
          "value": L_min, "unit": "H", "formula": "L ≥ (V_in − V_out)·D / (ΔI_L·f_sw)",
@@ -121,16 +123,20 @@ def size(requirements: dict, params: dict, ripple_ratio: float = 0.4, control_pe
          "twist": C_twist, "meets": C_twist >= C_dip,
          "note": "The dip before any controller reacts. ESR damping is ignored, so this is pessimistic."},
         {"id": "dip_lc", "title": "Passive dip of the Twist's filter for the load step",
-         "value": undershoot_lc(delta_step, L_twist, C_twist), "unit": "V", "formula": "ΔV = ΔI_step·√(L/C)",
-         "twist": None, "meets": undershoot_lc(delta_step, L_twist, C_twist) <= undershoot_max},
+         "value": dip_lc, "unit": "V", "formula": "ΔV = ΔI_step·√(L/C)",
+         "twist": None, "meets": passive_ok},
         {"id": "f0", "title": "Output filter resonance (all LOW capacitors)",
          "value": f0, "unit": "Hz", "formula": "f₀ = 1 / (2π·√(L·C))", "twist": None, "meets": None},
         {"id": "f_c_needed", "title": "Loop crossover REQ-UNDERSHOOT needs, with the Twist's capacitors",
-         "value": f_c_needed, "unit": "Hz", "formula": "f_c ≥ ΔI_step / (2π·C·ΔV)", "twist": None, "meets": None},
+         "value": f_c_needed, "unit": "Hz", "formula": "f_c ≥ ΔI_step / (2π·C·ΔV)", "twist": None, "meets": None,
+         **({"note": "Not needed here: the filter's own dip already meets REQ-UNDERSHOOT. The loop only has to "
+                     "settle without making the dip deeper."} if passive_ok else {})},
         {"id": "period_for_req", "title": "Control period for that crossover (f_control ≥ 10·f_c)",
          "value": 1.0 / (10.0 * f_c_needed), "unit": "s", "formula": "T_control ≤ 1 / (10·f_c)",
-         "twist": control_period_s, "meets": control_period_s <= 1.0 / (10.0 * f_c_needed),
-         "note": "A rule of thumb; tests/studies/undershoot_vs_period.py finds 4.9 % reachable at 20 µs."},
+         "twist": control_period_s, "meets": passive_ok or control_period_s <= 1.0 / (10.0 * f_c_needed),
+         "note": "Not needed: the filter alone meets REQ-UNDERSHOOT." if passive_ok else
+                 "A rule of thumb; tests/studies/undershoot_vs_period.py finds 4.9 % reachable at 20 µs "
+                 "for the 1 A → 2 A step."},
     ]
     return {"inputs": {"v_in_V": v_in, "v_out_V": v_out, "load_step_A": [i_before, i_after], "f_sw_Hz": f_sw,
                        "ripple_max_V": ripple_max, "undershoot_max_V": undershoot_max, "ripple_ratio": ripple_ratio,

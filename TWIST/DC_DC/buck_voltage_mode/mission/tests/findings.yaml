@@ -9,7 +9,8 @@ findings:
     criteria: [BUCK-STEP-01b]
     cause: "At a 100 µs control period no PI gets the load-step undershoot below 5.67 % (study undershoot_vs_period); 4.92 % at 20 µs. The dip is the filter's passive response."
     owner: Luiz
-    status: open
+    status: closed
+    resolution: "Luiz halved the load step (1 A -> 1.5 A), 2026-11-07: BUCK-STEP-01b passes at 11.65 V."
     blocks: "Students solving the mission as specified"
   - issue: https://github.com/luizvilla/Theia/issues/14
     criteria: [BENCH-MOD-01.a5]

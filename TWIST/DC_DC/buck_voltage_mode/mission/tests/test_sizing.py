@@ -34,17 +34,39 @@ class MissionSizing(unittest.TestCase):
         self.r = {x["id"]: x for x in sizing.size(reqs, load_params())["results"]}
 
     def test_inductance_by_hand(self):
-        # (40 - 12) * 0.3 / (0.4 * 2 A * 200 kHz) = 52.5 uH
-        self.assertAlmostEqual(self.r["L"]["value"], 28 * 0.3 / (0.8 * 200e3))
+        # (40 - 12) * 0.3 / (0.4 * 1.5 A * 200 kHz) = 70 uH
+        self.assertAlmostEqual(self.r["L"]["value"], 28 * 0.3 / (0.4 * 1.5 * 200e3))
 
     def test_ripple_is_met_by_the_ceramics(self):
         self.assertTrue(self.r["C_ripple"]["meets"])
+
+    def test_the_twist_filter_alone_holds_the_half_step(self):
+        # 33 uH * (0.5 A / 0.6 V)^2 = 22.9 uF < 61.1 uF; the passive dip 0.5 A * sqrt(L/C) = 0.37 V < 0.6 V
+        self.assertAlmostEqual(self.r["C_dip"]["value"], 33e-6 * (0.5 / 0.6) ** 2)
+        self.assertTrue(self.r["C_dip"]["meets"])
+        self.assertTrue(self.r["dip_lc"]["meets"])
+        self.assertAlmostEqual(self.r["f0"]["value"], 1 / (2 * math.pi * math.sqrt(33e-6 * 61.1e-6)))
+
+    def test_no_control_period_is_needed_when_the_filter_holds_the_dip(self):
+        f_c = 0.5 / (2 * math.pi * 61.1e-6 * 0.6)
+        self.assertAlmostEqual(self.r["period_for_req"]["value"], 1 / (10 * f_c))
+        self.assertTrue(self.r["period_for_req"]["meets"])
+        self.assertIn("Not needed", self.r["period_for_req"]["note"])
+
+
+class TheFullStep(unittest.TestCase):
+    """The 1 A -> 2 A step of the mission before #11: the filter alone does not hold it."""
+    def setUp(self):
+        reqs = yaml.safe_load((MISSION / "requirements.yaml").read_text())
+        for r in reqs["requirements"]:
+            if "load_step_A" in r.get("conditions", {}):
+                r["conditions"] = dict(r["conditions"], load_step_A=[1.0, 2.0])
+        self.r = {x["id"]: x for x in sizing.size(reqs, load_params())["results"]}
 
     def test_undershoot_needs_more_than_the_twist_has(self):
         # 33 uH * (1 A / 0.6 V)^2 = 91.7 uF > 61.1 uF
         self.assertAlmostEqual(self.r["C_dip"]["value"], 33e-6 / 0.36)
         self.assertFalse(self.r["C_dip"]["meets"])
-        self.assertAlmostEqual(self.r["f0"]["value"], 1 / (2 * math.pi * math.sqrt(33e-6 * 61.1e-6)))
 
     def test_control_period_for_the_undershoot(self):
         f_c = 1.0 / (2 * math.pi * 61.1e-6 * 0.6)

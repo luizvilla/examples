@@ -56,7 +56,7 @@ def build_block(out: pathlib.Path) -> pathlib.Path:
 
 class Harness:
     def __init__(self, mission=MISSION, v_in: float | None = None, load_ohm: float = 12.0,
-                 step_load_ohm: float = 12.0, build_dir: str | None = None, store_every: int = 4):
+                 step_load_ohm: float = 24.0, build_dir: str | None = None, store_every: int = 4):
         import tempfile
         self.block_dir = pathlib.Path(build_dir) if build_dir else pathlib.Path(tempfile.mkdtemp(prefix="ownstudio-block-"))
         self.block_path = build_block(self.block_dir)
@@ -71,6 +71,7 @@ class Harness:
             q["port_high_V"] = float(v_in)
         self.q = q
         self.load_ohm = float(load_ohm)
+        self.step_load_ohm = float(step_load_ohm)   # switched in parallel by load_step: 0.5 A more at 12 V
         plant = build(q, load_ohm=self.load_ohm)
         b = plant.builder
         b.add_resistor("R_step", "low1", "step", float(step_load_ohm))
