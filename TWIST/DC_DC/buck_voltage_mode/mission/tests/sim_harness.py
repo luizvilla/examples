@@ -17,6 +17,7 @@ plant is plant/twist_buck.py (one leg; leg 2 reads the same as leg 1).
 from __future__ import annotations
 
 import ctypes
+import math
 import os
 import pathlib
 import subprocess
@@ -69,7 +70,8 @@ class Harness:
         if v_in is not None:
             q["port_high_V"] = float(v_in)
         self.q = q
-        plant = build(q, load_ohm=float(load_ohm))
+        self.load_ohm = float(load_ohm)
+        plant = build(q, load_ohm=self.load_ohm)
         b = plant.builder
         b.add_resistor("R_step", "low1", "step", float(step_load_ohm))
         b.add_switch("S_step", "step", "0", 1e3, 1e-9)
@@ -129,11 +131,13 @@ class Harness:
         return self.t
 
     def _switch_fn(self, t):
-        k = int(t // self.period)
+        # The period index, robust to t landing a hair below a period start: a resumed segment's
+        # times carry different rounding, and t // period would then shift the edges by one step.
+        k = int(math.floor(t / self.period + 1e-6))
         if k != self.pwm_k:                     # the duty takes effect at the next PWM period
             self.pwm_k, self.applied = k, self.command
         on = self.mode == 1
-        phase, d = t - k * self.period, self.applied
+        phase, d = max(0.0, t - k * self.period), self.applied
         self.mask.set(self.hs, on and self.dead <= phase < d * self.period)
         self.mask.set(self.ls, on and d * self.period + self.dead <= phase < self.period)
         self.mask.set(self.step_sw, self.load_step)
@@ -163,10 +167,11 @@ class Harness:
         self.t = end
 
     def capture(self):
-        """Waveforms since the last capture: t, v_low1, i_l (numpy arrays) and the control ticks (t, duty)."""
+        """Waveforms since the last capture, named like the board's scope channels: t, rV1Low_V,
+        rI1Low_A (numpy arrays), and the control ticks as (t, duty) pairs (duty)."""
         out = {"t": np.concatenate(self.trace_t) if self.trace_t else np.array([]),
-               "v_low1": np.concatenate(self.trace_v) if self.trace_v else np.array([]),
-               "i_l": np.concatenate(self.trace_i) if self.trace_i else np.array([]),
+               "rV1Low_V": np.concatenate(self.trace_v) if self.trace_v else np.array([]),
+               "rI1Low_A": np.concatenate(self.trace_i) if self.trace_i else np.array([]),
                "duty": np.asarray(self.ticks)}
         self.trace_t, self.trace_v, self.trace_i, self.ticks = [], [], [], []
         return out

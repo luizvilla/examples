@@ -90,12 +90,12 @@ def run(target, ctx):
     target.wait(END_S - STEP_AT_S)
     target.update("Converter", {"Mode": 0})
     wave = target.capture()
-    t, v, i_l, duty = wave["t"], wave["v_low1"], wave["i_l"], wave["duty"]
+    t, v, i_l, duty = wave["t"], wave["rV1Low_V"], wave["rI1Low_A"], wave["duty"]
     cases = evaluate(q, t, v)
     for c in cases:
         ctx.log(f"{'PASS' if c['passed'] else 'FAIL'} {c['id']}: {c['title']}: {c['measured']:.4g} {c['unit']} ({c['criterion']})")
     keep = slice(None, None, 10)                                   # 1 µs resolution for the overlay
-    waveform = "t_s,v_low1_V,i_l_A\n" + "\n".join(f"{a:.7g},{b:.7g},{c:.7g}" for a, b, c in zip(t[keep], v[keep], i_l[keep]))
+    waveform = "t_s,rV1Low_V,rI1Low_A\n" + "\n".join(f"{a:.7g},{b:.7g},{c:.7g}" for a, b, c in zip(t[keep], v[keep], i_l[keep]))
     duty_csv = "t_s,duty\n" + "\n".join(f"{a:.7g},{b:.7g}" for a, b in duty)
     ctx.record("buck-step-01", "BUCK-STEP-01 load step", "L1", cases,
                inputs={"firmware/control.cpp": MISSION / "firmware" / "control.cpp",

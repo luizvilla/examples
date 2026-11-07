@@ -61,7 +61,7 @@ tests:
   # Reference step: tests/procedures/reference_step.py, the same procedure on both targets
   - {id: BUCK-REF-01a, tab: loop, level: [L1, L2], target: [simulator, board], status: implemented, title: "Steady LOW1 at a 10 V reference", criterion: "within 2 %"}
   - {id: BUCK-REF-01b, tab: loop, level: [L1, L2], target: [simulator, board], status: implemented, title: "Steady LOW1 at a 12 V reference", criterion: "within 2 %"}
-  - {id: BUCK-REF-01c, tab: loop, level: [L1, L2], target: [simulator, board], status: partial, title: "Settling after the 10 V → 12 V step", criterion: "information only; on the board it needs the firmware scope"}
+  - {id: BUCK-REF-01c, tab: loop, level: [L1, L2], target: [simulator, board], status: implemented, title: "Settling after the 10 V → 12 V step", criterion: "information only (from the waveform: the firmware scope on the board)"}
   - id: BUCK-STEP-02
     tab: loop
     level: L2
