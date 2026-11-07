@@ -11,7 +11,7 @@ import pathlib
 import sys
 
 from ownstudio_lab.testing import _show as show  # noqa: F401
-from ownstudio_lab.testing import new_campaign, write_record
+from ownstudio_lab.testing import case_verdict, new_campaign, write_record  # noqa: F401
 
 MISSION = pathlib.Path(__file__).resolve().parents[1]
 
