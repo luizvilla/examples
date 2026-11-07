@@ -1,11 +1,11 @@
 {
   "image": "firmware.mcuboot.bin",
-  "sha256": "2adf51949ee6ba5add81364f759080cb9a18a35e49f60cedd6e68edcc3f5341b",
+  "sha256": "0385024e08e5dfcd907ecdc2e8aa9a0ba66b053ea6cafe71546bc2a2bad47242",
   "size": 227328,
   "build": {
-    "commit": "e4cb76a222c2a4e2fd4cbb1b23271fcdc3c45b2d",
+    "commit": "7b831d27daffcfd9b42d0e1a42191d83a701ad2a",
     "dirty": false,
-    "source_hash": "53f91fdde3f983f4"
+    "source_hash": "3df0095bacb80f1b"
   },
   "core_commit": "8111a0dc798e9bd426081d5705af77a86cd7dbf8",
   "board": "spin",
