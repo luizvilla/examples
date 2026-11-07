@@ -17,6 +17,7 @@ OwnStudio opens this folder through `mission.yaml`. Every file is plain text, an
 | `design/sizing.py` | Analytic buck formulas used for sizing |
 | `plant/` | Pulsim model of one Twist leg, its parameters with sources, and its model tests |
 | `tests/` | L0 tests of the control law, the L1 load-step test, the L2 link test, consistency tests, the test-record writer |
+| `panels/` | Lab panels in the subset of modular's dashboard format that OwnStudio reads (gauges, numbers, setpoint, power button, time plot) |
 | `bin/` | The pre-built firmware and its manifest (SHA-256 and build identity), so the Lab works before anyone compiles |
 | `tools/` | Data object generator, firmware build (`--release` refreshes `bin/`), build identity |
 

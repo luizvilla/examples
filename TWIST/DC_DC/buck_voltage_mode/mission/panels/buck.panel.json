@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "allow_edit": true,
+  "plugins": [],
+  "columns": 3,
+  "datasources": [
+    {
+      "name": "Twist",
+      "type": "owntech_thingset_datasource",
+      "settings": { "autoDetect": true, "baudRate": 115200, "usePrefix": false, "refresh": 250 }
+    }
+  ],
+  "panes": [
+    {
+      "title": "Output (LOW1)",
+      "width": 1, "row": { "3": 1 }, "col": { "3": 1 }, "col_width": 1,
+      "widgets": [
+        { "type": "radial_arc_gauge",
+          "settings": { "title": "LOW1 voltage", "min": 0, "max": 20, "units": "V", "showValue": true, "showMinMax": true,
+            "sourceDef": { "ds": "Twist", "type": "owntech_thingset_datasource", "device": null, "device_uid": null, "var": "/Measurements/rV1Low_V" } } },
+        { "type": "text_widget",
+          "settings": { "title": "LOW1 current", "units": "A", "size": "regular",
+            "sourceDef": { "ds": "Twist", "type": "owntech_thingset_datasource", "device": null, "device_uid": null, "var": "/Measurements/rI1Low_A" } } }
+      ]
+    },
+    {
+      "title": "Command",
+      "width": 1, "row": { "3": 1 }, "col": { "3": 2 }, "col_width": 1,
+      "widgets": [
+        { "type": "plus_minus_button",
+          "settings": { "title": "Voltage reference", "units": "V", "step": 0.5, "writePath": "/Converter/wVoltageRef_V", "datasource": "Twist",
+            "sourceDef": { "ds": "Twist", "type": "owntech_thingset_datasource", "device": null, "device_uid": null, "var": "/Converter/wVoltageRef_V" } } },
+        { "type": "toggle_button",
+          "settings": { "title": "Power", "writePath": "/Converter/Mode", "onValue": 1, "offValue": 0, "datasource": "Twist",
+            "sourceDef": { "ds": "Twist", "type": "owntech_thingset_datasource", "device": null, "device_uid": null, "var": "/Converter/Mode" } } },
+        { "type": "text_widget",
+          "settings": { "title": "Duty cycle", "units": "", "size": "regular",
+            "sourceDef": { "ds": "Twist", "type": "owntech_thingset_datasource", "device": null, "device_uid": null, "var": "/Measurements/rDuty" } } }
+      ]
+    },
+    {
+      "title": "Input (HIGH)",
+      "width": 1, "row": { "3": 1 }, "col": { "3": 3 }, "col_width": 1,
+      "widgets": [
+        { "type": "radial_needle_gauge",
+          "settings": { "title": "HIGH voltage", "min": 0, "max": 60, "units": "V", "showValue": true, "showMinMax": true,
+            "alarmEnabled": true, "criticalThreshold": 60, "alarmDirection": "above",
+            "sourceDef": { "ds": "Twist", "type": "owntech_thingset_datasource", "device": null, "device_uid": null, "var": "/Measurements/rVHigh_V" } } },
+        { "type": "text_widget",
+          "settings": { "title": "Heatsink temperature, leg 1", "units": "°C", "size": "regular",
+            "sourceDef": { "ds": "Twist", "type": "owntech_thingset_datasource", "device": null, "device_uid": null, "var": "/Measurements/rTemp1_degC" } } }
+      ]
+    },
+    {
+      "title": "LOW1 voltage and reference",
+      "width": 3, "row": { "3": 2 }, "col": { "3": 1 }, "col_width": 3,
+      "widgets": [
+        { "type": "time_plot_uplot",
+          "settings": { "title": "LOW1 voltage and reference", "duration": 10000, "refreshRate": 250, "yLabel": "V", "yMin": 0, "yMax": 20, "showLegend": true,
+            "seriesDefs": [
+              { "label": "LOW1", "op": "identity", "param": 0, "b": null,
+                "a": { "ds": "Twist", "type": "owntech_thingset_datasource", "device": null, "device_uid": null, "var": "/Measurements/rV1Low_V" } },
+              { "label": "Reference", "op": "identity", "param": 0, "b": null,
+                "a": { "ds": "Twist", "type": "owntech_thingset_datasource", "device": null, "device_uid": null, "var": "/Converter/wVoltageRef_V" } }
+            ] } }
+      ]
+    }
+  ]
+}
