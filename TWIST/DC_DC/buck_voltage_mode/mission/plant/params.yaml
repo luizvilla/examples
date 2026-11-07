@@ -1,0 +1,21 @@
+# Parameters of the Twist buck plant model (one power leg, LOW1 side).
+#
+# Every value says where it comes from and how much to trust it.
+# confidence: high = read from a datasheet or the firmware; medium = read
+# from the hardware sources but its role is inferred; low = placeholder
+# or assumption, to be replaced by a measurement.
+
+board: twist
+board_version: "1.4.3"
+
+port_high_V:        {value: 40.0,    source: "mission operating point; inside the 20-60 V supply range of the buck example", confidence: high}
+inductance_H:       {value: 33.0e-6, source: "TWIST KiCad PowerLeg.kicad_sch v1.4.3, inductor value", confidence: medium}
+capacitance_F:      {value: 33.0e-6, source: "TWIST KiCad PowerLeg.kicad_sch v1.4.3, 33 uF capacitor; that it is the LOW-side output capacitor is inferred", confidence: low}
+switching_freq_Hz:  {value: 200000.0, source: "TWIST datasheet: 200 kHz", confidence: high}
+dead_time_s:        {value: 100.0e-9, source: "assumption; take the real value from the HRTIM configuration of Core", confidence: low}
+switch_on_ohm:      {value: 0.01,    source: "placeholder MOSFET on-resistance", confidence: low}
+diode_forward_V:    {value: 0.7,     source: "placeholder body-diode forward voltage", confidence: low}
+load_ohm:           {value: 6.0,     source: "mission load: 12 V / 2 A", confidence: high}
+
+simulation:
+  step_s: 25.0e-9      # 200 steps per switching period
