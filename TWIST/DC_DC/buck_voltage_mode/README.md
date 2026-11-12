@@ -7,6 +7,16 @@ This example will implement a voltage mode buck converter to control the output.
 !!! warning "Are you ready to start?"
     Before you can run this example, you must have successfully gone through our [getting started](https://docs.owntech.org/latest/core/docs/environment_setup/).  
 
+## In OwnStudio
+
+On this branch the example is ready for OwnStudio. Loading it into a setup copies these files into `src/`:
+
+- `main.cpp`: the same buck, with the PI moved out and the serial menu replaced by ThingSet data objects (mode, voltage reference, measurements, build identity) on the board's second USB serial port (`app.overlay`, `app.conf`);
+- `control.cpp`, `control.h`: the PI as a hardware-free `control_step()`, which OwnStudio's simulator compiles too;
+- `data_objects.*`, `scope.*`, `build_identity.cpp`: the data objects, the firmware scope the Lab captures from, and the identity OwnStudio checks before a run.
+
+The serial menu and the console printout described below belong to the original example; in OwnStudio the Lab drives the converter.
+
 ## Hardware setup and requirements
 
 
